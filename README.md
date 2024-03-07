@@ -1,4 +1,6 @@
-# 2GIS pre-receive checks
+# 2GIS GIT Hooks
+
+Small lightweight package for GIT hooks.
 
 # Dependencies
 

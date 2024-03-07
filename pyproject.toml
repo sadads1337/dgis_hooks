@@ -1,0 +1,38 @@
+[project]
+name = "dgis_hooks"
+version = "0.0.1"
+authors = [
+    { name = "Ilya Makarov", email="i.o.makarov@2gis.ru" },
+]
+description="Small lightweight package for git hooks."
+readme="README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+]
+
+[project.scripts]
+dgis-pre-receive = "dgis.hooks.pre_receive:entry_point"
+
+# Packaged plugins.
+[project.entry-points."dgis.hooks.plugins"]
+branch_check = "dgis.hooks.plugins.packaged.branch_check:BranchCheckPlugin"
+json_check = "dgis.hooks.plugins.packaged.json_check:JsonCheckPlugin"
+xml_check = "dgis.hooks.plugins.packaged.xml_check:XmlCheckPlugin"
+
+[project.urls]
+Homepage = "https://github.com/sadads1337/dgis_hooks"
+Issues = "https://github.com/sadads1337/dgis_hooks/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+pythonpath = [
+    ".",
+    "src",
+]
