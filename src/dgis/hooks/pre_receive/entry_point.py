@@ -1,3 +1,9 @@
+"""
+This is entry point for pre receive hook.
+Run this script or `dgis-pre-receive --help` to get more info.
+"""
+
+import argparse
 import fileinput
 import os
 
@@ -12,6 +18,9 @@ from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
 
 def entry_point() -> ExitStatus:
+    parser = argparse.ArgumentParser(description=__doc__)
+    args = parser.parse_args()
+
     log = init_log(__package__)
 
     log_info(f"Running pre-recieve hook version: {get_version()}")
