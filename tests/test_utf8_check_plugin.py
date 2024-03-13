@@ -3,7 +3,7 @@ import pytest
 from git import Repo
 
 from dgis.hooks.plugins.packaged.utf8_check import UTF8CheckPlugin
-from dgis.hooks.plugins.plugin import PluginContext, PluginResult, PluginResultStatus, execute_plugin
+from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute_plugin
 from dgis.hooks.utility.git import GitRef
 
 

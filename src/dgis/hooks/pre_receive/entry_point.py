@@ -7,7 +7,7 @@ import argparse
 import fileinput
 import os
 
-from dgis.hooks.plugins.plugin import PluginResult, PluginContext, PluginResultStatus, execute_plugin
+from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute_plugin
 from dgis.hooks.plugins.discover import discover_and_load_plugins
 from dgis.hooks.utility.common import ExitStatus, get_version
 from dgis.hooks.utility.git import parse_ref

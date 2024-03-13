@@ -1,6 +1,5 @@
-import xml.etree.ElementTree as et
-
 from pathlib import Path
+from xml.etree import ElementTree
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
 
@@ -24,8 +23,8 @@ class XmlCheckPlugin(Plugin):
 
             with open(file_path, "r") as file:
                 try:
-                    et.parse(file).getroot()
-                except et.ParseError as error:
+                    ElementTree.parse(file).getroot()
+                except ElementTree.ParseError as error:
                     errors[file_path] = error
                     continue
         return PluginResult(PluginResultStatus.Failed, errors) if errors else PluginResult(PluginResultStatus.Ok, None)

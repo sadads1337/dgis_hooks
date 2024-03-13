@@ -1,7 +1,7 @@
 import pytest
 
 from dgis.hooks.plugins.packaged.branch_check import BranchCheckPlugin
-from dgis.hooks.plugins.plugin import PluginContext, PluginResult, PluginResultStatus, execute_plugin
+from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute_plugin
 from dgis.hooks.utility.git import GitRef
 
 from tests.utility import make_test_repo
