@@ -19,6 +19,10 @@ from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
 def entry_point() -> ExitStatus:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('plugins', nargs='*', required=False,
+                        help="Optional list of enabled plugins. "
+                             "If empty then hook enables all plugins from namespaces "
+                             "dgis.hooks.plugins and dgis.hooks.plugins.packaged.")
     args = parser.parse_args()
 
     log = init_log(__package__)
@@ -26,7 +30,10 @@ def entry_point() -> ExitStatus:
     log_info(f"Running pre-recieve hook version: {get_version()}")
 
     with timed_block("Discovering plugins"):
-        plugins = discover_and_load_plugins()
+        enabled_plugins = args.plugins if args.plugins else []
+        plugins = discover_and_load_plugins(enabled_plugins)
+        for plugin in plugins:
+            log_info(f"Discovered plugin: '{plugin.name}'")
 
     if not plugins:
         log_warning("No plugins found, nothing to check")

@@ -23,9 +23,9 @@ dgis-pre-receive = "dgis.hooks.pre_receive:entry_point"
 
 # Packaged plugins.
 [project.entry-points."dgis.hooks.plugins"]
-branch_check = "dgis.hooks.plugins.packaged.branch_check:BranchCheckPlugin"
-json_check = "dgis.hooks.plugins.packaged.json_check:JsonCheckPlugin"
-xml_check = "dgis.hooks.plugins.packaged.xml_check:XmlCheckPlugin"
+BranchCheckPlugin = "dgis.hooks.plugins.packaged.branch_check:BranchCheckPlugin"
+JsonCheckPlugin = "dgis.hooks.plugins.packaged.json_check:JsonCheckPlugin"
+XmlCheckPlugin = "dgis.hooks.plugins.packaged.xml_check:XmlCheckPlugin"
 
 [project.urls]
 Homepage = "https://github.com/sadads1337/dgis_hooks"
