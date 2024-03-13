@@ -25,6 +25,7 @@ dgis-pre-receive = "dgis.hooks.pre_receive:entry_point"
 [project.entry-points."dgis.hooks.plugins"]
 BranchCheckPlugin = "dgis.hooks.plugins.packaged.branch_check:BranchCheckPlugin"
 JsonCheckPlugin = "dgis.hooks.plugins.packaged.json_check:JsonCheckPlugin"
+UTF8CheckPlugin = "dgis.hooks.plugins.packaged.utf8_check:UTF8CheckPlugin"
 XmlCheckPlugin = "dgis.hooks.plugins.packaged.xml_check:XmlCheckPlugin"
 
 [project.urls]
