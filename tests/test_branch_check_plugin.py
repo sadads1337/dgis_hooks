@@ -35,7 +35,7 @@ def test_valid_branch_names(tmp_path, branch_name):
     context = PluginContext(ref, git_repo, None)
 
     with execute_plugin(BranchCheckPlugin, context) as result:
-        assert result == PluginResultStatus.Ok
+        assert result.status == PluginResultStatus.Ok
 
 
 @pytest.mark.parametrize("branch_name", _g_invalid_branch_names)
@@ -47,4 +47,4 @@ def test_invalid_branch_names(tmp_path, branch_name):
     context = PluginContext(ref, git_repo, None)
 
     with execute_plugin(BranchCheckPlugin, context) as result:
-        assert result == PluginResultStatus.Failed
+        assert result.status == PluginResultStatus.Failed

@@ -11,8 +11,8 @@ class BranchCheckPlugin(Plugin):
         if context.log:
             context.log.info(f"Executing '{__name__}'")
 
-        return PluginResultStatus.Ok if cls._allowed_symbols_regex.search(context.ref.ref) \
-            else PluginResultStatus.Failed
+        return PluginResult(PluginResultStatus.Ok if cls._allowed_symbols_regex.search(context.ref.ref)
+                            else PluginResultStatus.Failed, None)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
