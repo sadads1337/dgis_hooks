@@ -41,3 +41,7 @@ def entry_point() -> ExitStatus:
                         return ExitStatus.Error
 
     return ExitStatus.Success
+
+
+if __name__ == "__main__":
+    exit(entry_point())
