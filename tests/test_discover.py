@@ -9,10 +9,11 @@ def test_empty_enabled_plugins():
         from importlib_metadata import entry_points
     else:
         from importlib.metadata import entry_points
-    expected_plugins = entry_points(group="dgis.hooks.plugins")
+    expected_plugins = {entry.name for entry in entry_points(group="dgis.hooks.plugins")}
     plugins = discover_and_load_plugins([])
 
-    assert all([plugin in expected_plugins for plugin in plugins])
+    assert len(plugins) == len(expected_plugins)
+    assert all([plugin.__name__ in expected_plugins for plugin in plugins])
 
 
 def test_single_enabled_plugins():
