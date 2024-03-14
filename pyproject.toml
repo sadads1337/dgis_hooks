@@ -17,10 +17,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "GitPython>=3.1",
-    "pytest>=8.1",
-    "simplejson>=3.19",
-    "importlib-metadata>=7.0",
+    "GitPython",
+    "pytest",
+    "simplejson",
+    "importlib-metadata",
 ]
 
 [project.scripts]
