@@ -1,4 +1,4 @@
-import importlib.metadata
+import sys
 import time
 
 from contextlib import contextmanager
@@ -13,7 +13,12 @@ class ExitStatus(Enum):
 
 
 def get_version() -> str:
-    return importlib.metadata.version("dgis_hooks")
+    if sys.version_info < (3, 10):
+        from importlib_metadata import version
+        return version("dgis_hooks")
+    else:
+        from importlib.metadata import version
+        return version("dgis_hooks")
 
 
 @contextmanager
