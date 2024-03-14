@@ -21,6 +21,7 @@ dependencies = [
     "pytest",
     "simplejson",
     "importlib-metadata",
+    "dataclasses"
 ]
 
 [project.scripts]
