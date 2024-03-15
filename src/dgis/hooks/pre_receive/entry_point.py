@@ -17,7 +17,7 @@ from dgis.hooks.utility.common import timed_block
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
 
-def entry_point() -> ExitStatus:
+def _main() -> ExitStatus:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('plugins', nargs='*', default=[],
                         help="Optional list of enabled plugins. "
@@ -62,5 +62,9 @@ def entry_point() -> ExitStatus:
     return ExitStatus.Success
 
 
+def entry_point():
+    exit(int(_main()))
+
+
 if __name__ == "__main__":
-    exit(entry_point())
+    entry_point()

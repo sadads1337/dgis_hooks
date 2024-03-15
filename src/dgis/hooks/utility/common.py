@@ -2,12 +2,12 @@ import sys
 import time
 
 from contextlib import contextmanager
-from enum import Enum
+from enum import IntEnum
 
 from dgis.hooks.utility.log import log_info
 
 
-class ExitStatus(Enum):
+class ExitStatus(IntEnum):
     Success = 0
     Error = -1
 
