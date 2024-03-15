@@ -9,16 +9,13 @@ class BranchCheckPlugin(Plugin):
     @classmethod
     def execute(cls, context: PluginContext) -> PluginResult:
         if context.log:
-            context.log.info(f"Executing '{__name__}'")
-
-        if context.log:
-            context.log.debug(f"Check '{__name__}' for ref: '{context.ref.ref}'")
+            context.log.debug(f"Executing '{cls.__name__}' for ref: '{context.ref.ref}'")
 
         status = PluginResultStatus.Ok if cls._allowed_symbols_regex.search(context.ref.ref) \
             else PluginResultStatus.Failed
 
         if context.log:
-            context.log.debug(f"Check '{__name__}' finished with status: '{status}'")
+            context.log.info(f"Check '{cls.__name__}' finished with status: '{status}'")
 
         return PluginResult(status, None)
 
