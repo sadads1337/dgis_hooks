@@ -49,12 +49,15 @@ def entry_point() -> ExitStatus:
             return ExitStatus.Error
 
     with timed_block("Processing checks"):
-        for line in fileinput.input():
-            context = PluginContext(parse_ref(line), git_repo, log)
-            for plugin in plugins:
-                with execute_plugin(plugin, context) as result:
-                    if result.status == PluginResultStatus.Failed:
-                        return ExitStatus.Error
+        # Using "-" as a filename ignores argv[1:] and reads only from stdin.
+        # Doc: https://docs.python.org/3/library/fileinput.html
+        with fileinput.input("-") as file:
+            for line in file:
+                context = PluginContext(parse_ref(line), git_repo, log)
+                for plugin in plugins:
+                    with execute_plugin(plugin, context) as result:
+                        if result.status == PluginResultStatus.Failed:
+                            return ExitStatus.Error
 
     return ExitStatus.Success
 
