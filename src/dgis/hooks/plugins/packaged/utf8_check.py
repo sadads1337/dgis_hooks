@@ -23,16 +23,27 @@ class UTF8CheckPlugin(Plugin):
             if file_path.suffix.lower() not in cls._file_extensions_to_check:
                 continue
 
+            if context.log:
+                context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
+
             try:
                 codecs.open(file_path, encoding='utf-8', errors='strict').readlines()
             except UnicodeDecodeError as error:
                 errors["file_path"] = error
 
-        return PluginResult(PluginResultStatus.Failed, errors) if errors else PluginResult(PluginResultStatus.Ok, None)
+        return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
-        if not context.log or result.status == PluginResultStatus.Ok:
+        if not context.log:
             return
-        for file_path, error in result.data.items():
-            context.log.error(f"Check JSON failed for file: '{file_path}' with error: '{error}'")
+
+        log_func = context.log.info if result.status == PluginResultStatus.Ok else context.log.error
+        log_func(f"Check '{cls.__name__}' finished with status: '{result.status}'")
+
+        if result.status == PluginResultStatus.Ok:
+            return
+
+        if result.data:
+            for file_path, error in result.data.items():
+                context.log.error(f"Check JSON failed for file: '{file_path}' with error: '{error}'")

@@ -10,9 +10,6 @@ class JsonCheckPlugin(Plugin):
     def execute(cls, context: PluginContext) -> PluginResult:
         errors = {}
 
-        if context.log:
-            context.log.info(f"Executing '{__name__}'")
-
         diff = context.ref.diff(context.repo)
         for diff_content in diff:
             if diff_content.deleted_file:
@@ -22,18 +19,27 @@ class JsonCheckPlugin(Plugin):
             if file_path.suffix != ".json":
                 continue
 
+            if context.log:
+                context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
             with open(file_path, "r") as file:
                 try:
                     simplejson.load(file)
                 except ValueError as error:
                     errors[file_path] = error
-                    continue
 
-        return PluginResult(PluginResultStatus.Failed, errors) if errors else PluginResult(PluginResultStatus.Ok, None)
+        return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
-        if not context.log or result.status == PluginResultStatus.Ok:
+        if not context.log:
             return
-        for file_path, error in result.data.items():
-            context.log.error(f"Check JSON failed for file: '{file_path}' with error: '{error}'")
+
+        log_func = context.log.info if result.status == PluginResultStatus.Ok else context.log.error
+        log_func(f"Check '{cls.__name__}' finished with status: '{result.status}'")
+
+        if result.status == PluginResultStatus.Ok:
+            return
+
+        if result.data:
+            for file_path, error in result.data.items():
+                context.log.error(f"Check JSON failed for file: '{file_path}' with error: '{error}'")

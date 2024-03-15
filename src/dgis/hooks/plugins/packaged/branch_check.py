@@ -14,14 +14,17 @@ class BranchCheckPlugin(Plugin):
         status = PluginResultStatus.Ok if cls._allowed_symbols_regex.search(context.ref.ref) \
             else PluginResultStatus.Failed
 
-        if context.log:
-            context.log.info(f"Check '{cls.__name__}' finished with status: '{status}'")
-
         return PluginResult(status, None)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
-        if not context.log or result.status == PluginResultStatus.Ok:
+        if not context.log:
+            return
+
+        log_func = context.log.info if result.status == PluginResultStatus.Ok else context.log.error
+        log_func(f"Check '{cls.__name__}' finished with status: '{result.status}'")
+
+        if result.status == PluginResultStatus.Ok:
             return
 
         context.log.error(f"Invalid symbols in ref/branch name: '{context.ref.ref}', only [a-zA-Z0-9_./#] allowed")
