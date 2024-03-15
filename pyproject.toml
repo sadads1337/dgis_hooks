@@ -26,6 +26,7 @@ dependencies = [
 
 [project.scripts]
 dgis-pre-receive = "dgis.hooks.pre_receive:entry_point"
+dgis-clang-format-diff = "dgis.hooks.scripts:entry_point"
 
 # Packaged plugins.
 [project.entry-points."dgis.hooks.plugins"]
