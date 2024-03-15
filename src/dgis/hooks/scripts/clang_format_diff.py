@@ -31,7 +31,7 @@ import subprocess
 import sys
 import os
 import re
-import StringIO
+from io import StringIO, BytesIO
 import platform
 
 
@@ -51,7 +51,7 @@ def color_diff(diff):
             yield color + line[:-1] + colorama.Fore.RESET+line[-1]
 
 
-def main():
+def entry_point():
     parser = argparse.ArgumentParser(description=
                                      'Reformat changed lines in diff. Without -i '
                                      'option just output the diff that would be '
@@ -98,7 +98,7 @@ def clang_format(args):
     if not lines_by_file:
         #print('not found added lines')
         sys.exit(0)
-    for filename, lines in lines_by_file.iteritems():
+    for filename, lines in lines_by_file.items():
         if args.verbose:
             print('Formatting', os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(os.curdir)), os.path.basename(filename)))
         command = [args.binary, os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(os.curdir)), os.path.basename(filename))]
@@ -118,12 +118,12 @@ def clang_format(args):
         with open(os.path.join(args.filesrc), "r") as filesrc:
             formatted_code = filesrc.readlines()
     else:
-        formatted_code = StringIO.StringIO(stdout).readlines() if stdout else ''
+        formatted_code = StringIO(stdout.decode()).readlines() if stdout else ''
     diff = difflib.unified_diff(code, formatted_code,
                                 args.filesrc, args.filesrc,
                                 '--- (BAD CODE)', '+++ (GOOD CODE)', n=1)
     diff = color_diff(diff)
-    diff_string = string.join(diff, '')
+    diff_string = "".join(diff)
 
     if len(diff_string) > 0:
         print(diff_string.replace('\r', ''))
@@ -149,16 +149,13 @@ def caller_clang_binary(command):
     p = subprocess.Popen(command,
                          stdout=subprocess.PIPE,
                          stderr=sys.stderr,
-                         stdin=subprocess.PIPE,
-                         # shell=platform.system().lower() == 'windows',
-                         cwd=os.path.abspath(os.path.dirname(__file__)),
-                         env=dict(os.environ,
-                                  LD_LIBRARY_PATH=os.path.abspath(os.path.dirname(__file__))))
+                         stdin=subprocess.PIPE)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
+        print(os.path.abspath(os.path.dirname(__file__)))
         sys.exit(p.returncode)
     return stdout, stderr
 
 
 if __name__ == '__main__':
-    main()
+    entry_point()

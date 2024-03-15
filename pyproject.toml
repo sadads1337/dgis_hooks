@@ -21,7 +21,8 @@ dependencies = [
     "pytest",
     "simplejson",
     "importlib-metadata",
-    "dataclasses"
+    "dataclasses",
+    "colorama"
 ]
 
 [project.scripts]
