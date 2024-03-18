@@ -40,7 +40,6 @@ class GitRef:
 
     def diff(self, git_repo: Repo):
         commit = git_repo.commit(self.old_rev)
-        # TODO: Handle force updates.
         return commit.diff(self.new_rev)
 
 
