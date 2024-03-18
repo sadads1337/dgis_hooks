@@ -1,8 +1,10 @@
+import shutil
 import sys
 import time
 
 from contextlib import contextmanager
 from enum import IntEnum
+from pathlib import Path
 
 from dgis.hooks.utility.log import log_info
 
@@ -31,3 +33,14 @@ def timed_block(block_name: str):
         end = time.time()
         elapsed_secs = "{:.2f}".format(end - start)
         log_info(f"{block_name} elapsed in {elapsed_secs} secs")
+
+
+@contextmanager
+def temp_dir(dir_name: Path):
+    try:
+        if dir_name.exists():
+            shutil.rmtree(dir_name)
+        dir_name.mkdir()
+        yield
+    finally:
+        shutil.rmtree(dir_name)
