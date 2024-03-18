@@ -15,7 +15,7 @@ class JsonCheckPlugin(Plugin):
             if diff_content.deleted_file:
                 continue
 
-            file_path = Path(context.repo.working_dir) / diff_content.a_path
+            file_path = Path(context.repo.working_dir) / diff_content.b_path
             if file_path.suffix != ".json":
                 continue
 
