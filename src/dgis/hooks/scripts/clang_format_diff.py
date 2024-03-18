@@ -69,6 +69,8 @@ def entry_point():
                         help='path to file with diff')
     parser.add_argument('-filesrc',
                         help='path to source file')
+    parser.add_argument('-workdir', default=".",
+                        help='path to work-dir')
     args = parser.parse_args()
     clang_format(args)
 
@@ -100,8 +102,8 @@ def clang_format(args):
         sys.exit(0)
     for filename, lines in lines_by_file.items():
         if args.verbose:
-            print('Formatting', os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(os.curdir)), os.path.basename(filename)))
-        command = [args.binary, os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(os.curdir)), os.path.basename(filename))]
+            print('Formatting', os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(args.workdir)), os.path.basename(filename)))
+        command = [args.binary, os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(args.workdir)), os.path.basename(filename))]
         if args.i:
             command.append("-i")
         command.extend(lines)
@@ -111,7 +113,7 @@ def clang_format(args):
         if args.verbose:
             print(clang_format_config(args))
             print(command)
-        stdout, stderr = caller_clang_binary(command)
+        stdout, stderr = caller_clang_binary(command, args.workdir)
         if args.verbose:
             print(stdout)
     if args.i:
@@ -135,21 +137,22 @@ def clang_format(args):
 
 def clang_format_config(args):
     command = [args.binary, '--version']
-    stdout0, stderr0 = caller_clang_binary(command)
+    stdout0, stderr0 = caller_clang_binary(command, args.workdir)
     print(stdout0)
 
     command = [args.binary, '-dump-config']
     if args.style:
         command.extend(['-style', args.style])
-    stdout, stderr = caller_clang_binary(command)
+    stdout, stderr = caller_clang_binary(command, args.workdir)
     return stdout
 
 
-def caller_clang_binary(command):
+def caller_clang_binary(command, work_dir):
     p = subprocess.Popen(command,
                          stdout=subprocess.PIPE,
                          stderr=sys.stderr,
-                         stdin=subprocess.PIPE)
+                         stdin=subprocess.PIPE,
+                         cwd=work_dir)
     stdout, stderr = p.communicate()
     if p.returncode != 0:
         print(os.path.abspath(os.path.dirname(__file__)))
