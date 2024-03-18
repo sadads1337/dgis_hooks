@@ -62,7 +62,7 @@ class ClangFormatCheckPlugin(Plugin):
 
                 clang_format_call = [
                     "dgis-clang-format-diff",
-                    f"-style=file",
+                    "-style=file",
                     f"-filesrc={file_path.absolute()}",
                     f"-filediff={diff_file_path.absolute()}",
                     f"-binary={binary_path}",

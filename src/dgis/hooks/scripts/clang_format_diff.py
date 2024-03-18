@@ -26,13 +26,11 @@ from __future__ import print_function
 import argparse
 import colorama
 import difflib
-import string
 import subprocess
 import sys
 import os
 import re
-from io import StringIO, BytesIO
-import platform
+from io import StringIO
 
 
 def color_diff(diff):

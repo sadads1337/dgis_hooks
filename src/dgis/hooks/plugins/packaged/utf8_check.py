@@ -1,5 +1,3 @@
-import codecs
-
 from pathlib import Path
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus

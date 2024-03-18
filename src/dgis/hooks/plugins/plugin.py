@@ -54,4 +54,3 @@ def execute_plugin(plugin_type: Type[Plugin], plugin_context: PluginContext):
         yield PluginResult(PluginResultStatus.Failed, None)
     finally:
         plugin_type.post_execute(plugin_context, result)
-

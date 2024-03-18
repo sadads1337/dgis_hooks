@@ -1,10 +1,8 @@
-import shutil
 import sys
 import time
 
 from contextlib import contextmanager
 from enum import IntEnum
-from pathlib import Path
 
 from dgis.hooks.utility.log import log_info
 
