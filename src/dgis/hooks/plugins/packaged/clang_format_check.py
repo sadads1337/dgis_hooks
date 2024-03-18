@@ -1,4 +1,3 @@
-import os
 import shutil
 from pathlib import Path
 from subprocess import PIPE, Popen
@@ -7,7 +6,7 @@ from typing import Optional
 from git import Repo
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
-from hooks.utility.common import temp_dir
+from dgis.hooks.utility.common import temp_dir
 
 
 class ClangFormatCheckPlugin(Plugin):
