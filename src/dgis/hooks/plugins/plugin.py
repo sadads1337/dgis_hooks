@@ -46,8 +46,9 @@ class Plugin:
 
 @contextmanager
 def execute_plugin(plugin_type: Type[Plugin], plugin_context: PluginContext):
-    result = plugin_type.execute(plugin_context)
+    result = PluginResult(PluginResultStatus.Failed, None)
     try:
+        result = plugin_type.execute(plugin_context)
         yield result
     except Exception:
         yield PluginResult(PluginResultStatus.Failed, None)
