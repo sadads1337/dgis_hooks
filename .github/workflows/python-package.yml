@@ -37,4 +37,6 @@ jobs:
         flake8 src/**/*.py --max-line-length 120 --count --statistics --exit-zero --max-complexity=10 --per-file-ignores="src/dgis/hooks/pre_receive/__init__.py:F401 src/dgis/hooks/scripts/__init__.py:F401 src/dgis/hooks/scripts/clang_format_diff.py:E251,E265,E501,C901,W605"
     - name: Test with pytest
       run: |
+        git config --global user.email "tester@tester.com"
+        git config --global user.name "Tester Test"
         pytest
