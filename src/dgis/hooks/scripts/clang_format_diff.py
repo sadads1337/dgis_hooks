@@ -23,14 +23,16 @@ Example usage for git/svn users:
 
 """
 from __future__ import print_function
+
 import argparse
-import colorama
 import difflib
-import subprocess
-import sys
 import os
 import re
+import subprocess
+import sys
 from io import StringIO
+
+import colorama
 
 
 def color_diff(diff):
@@ -46,7 +48,7 @@ def color_diff(diff):
         if color is None:
             yield line
         else:
-            yield color + line[:-1] + colorama.Fore.RESET+line[-1]
+            yield color + line[:-1] + colorama.Fore.RESET + line[-1]
 
 
 def entry_point():
@@ -96,12 +98,14 @@ def clang_format(args):
     elif args.filesrc:
         lines_by_file.setdefault(args.filesrc, []).extend(['-lines', '1:' + str(len(code))])
     if not lines_by_file:
-        #print('not found added lines')
+        # print('not found added lines')
         sys.exit(0)
     for filename, lines in lines_by_file.items():
         if args.verbose:
-            print('Formatting', os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(args.workdir)), os.path.basename(filename)))
-        command = [args.binary, os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(args.workdir)), os.path.basename(filename))]
+            print('Formatting', os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(args.workdir)),
+                                             os.path.basename(filename)))
+        command = [args.binary, os.path.join(os.path.relpath(os.path.dirname(filename), os.path.abspath(args.workdir)),
+                                             os.path.basename(filename))]
         if args.i:
             command.append("-i")
         command.extend(lines)
@@ -129,7 +133,7 @@ def clang_format(args):
         print(diff_string.replace('\r', ''))
         sys.exit(1)
     else:
-        #print('nothing format')
+        # print('nothing format')
         sys.exit(0)
 
 
