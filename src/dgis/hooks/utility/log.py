@@ -9,9 +9,9 @@ def init_log(name: str):
     if _log:
         return
     _log = logging.getLogger(name)
-    _log.setLevel(logging.DEBUG)
+    _log.setLevel(logging.INFO)
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.INFO)
     formatter = logging.Formatter('[%(name)s][%(levelname)s] %(message)s')
     ch.setFormatter(formatter)
     _log.addHandler(ch)
