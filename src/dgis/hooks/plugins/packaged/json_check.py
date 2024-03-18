@@ -1,3 +1,5 @@
+import io
+
 import simplejson
 
 from pathlib import Path
@@ -21,11 +23,13 @@ class JsonCheckPlugin(Plugin):
 
             if context.log:
                 context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
-            with open(file_path, "r") as file:
-                try:
-                    simplejson.load(file)
-                except ValueError as error:
-                    errors[file_path] = error
+
+            json_content = context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode()
+            file = io.BytesIO(json_content)
+            try:
+                simplejson.load(file)
+            except ValueError as error:
+                errors[file_path] = error
 
         return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
 

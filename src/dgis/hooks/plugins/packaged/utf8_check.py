@@ -27,7 +27,7 @@ class UTF8CheckPlugin(Plugin):
                 context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
 
             try:
-                codecs.open(file_path, encoding='utf-8', errors='strict').readlines()
+                context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode()
             except UnicodeDecodeError as error:
                 errors["file_path"] = error
 

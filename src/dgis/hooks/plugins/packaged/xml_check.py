@@ -1,3 +1,5 @@
+import io
+
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -21,11 +23,12 @@ class XmlCheckPlugin(Plugin):
             if context.log:
                 context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
 
-            with open(file_path, "r") as file:
-                try:
-                    ElementTree.parse(file).getroot()
-                except ElementTree.ParseError as error:
-                    errors[file_path] = error
+            xml_content = context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode()
+            file = io.BytesIO(xml_content)
+            try:
+                ElementTree.parse(file).getroot()
+            except ElementTree.ParseError as error:
+                errors[file_path] = error
 
         return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
 
