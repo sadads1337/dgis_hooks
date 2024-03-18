@@ -1,4 +1,6 @@
 import shutil
+import tempfile
+
 from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import Optional
@@ -6,7 +8,6 @@ from typing import Optional
 from git import Repo
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
-from dgis.hooks.utility.common import temp_dir
 
 
 class ClangFormatCheckPlugin(Plugin):
@@ -24,12 +25,11 @@ class ClangFormatCheckPlugin(Plugin):
         errors = {}
 
         binary_path = "clang-format"
-        tmp_dir = Path("temp-for-format")
 
-        with temp_dir(tmp_dir):
+        with tempfile.TemporaryDirectory() as tmp_dir:
             clang_format_style_path = cls._find_clang_format_style_path(context.repo)
             if clang_format_style_path:
-                shutil.copy2(clang_format_style_path, tmp_dir / clang_format_style_path.name)
+                shutil.copy2(clang_format_style_path, Path(tmp_dir) / clang_format_style_path.name)
             else:
                 if context.log:
                     context.log.warning(f"No clang-format style file found while executing '{cls.__name__}'")
@@ -41,7 +41,7 @@ class ClangFormatCheckPlugin(Plugin):
                     continue
 
                 repo_file_path = Path(context.repo.working_dir) / diff_content.b_path
-                file_path = tmp_dir / repo_file_path.name
+                file_path = Path(tmp_dir) / repo_file_path.name
                 if file_path.suffix not in [".cpp", ".c", ".h", ".hpp", ".hqt"]:
                     continue
                 else:
@@ -50,7 +50,7 @@ class ClangFormatCheckPlugin(Plugin):
                 if context.log:
                     context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
 
-                diff_file_path = (tmp_dir / file_path.name).with_suffix(".diff")
+                diff_file_path = (Path(tmp_dir) / file_path.name).with_suffix(".diff")
                 with open(diff_file_path, "bw") as file:
                     if diff_content.a_blob and diff_content.b_blob:
                         binary_diff = context.repo.git.diff("-U0", diff_content.a_blob.hexsha,
@@ -66,7 +66,7 @@ class ClangFormatCheckPlugin(Plugin):
                     f"-filesrc={file_path.absolute()}",
                     f"-filediff={diff_file_path.absolute()}",
                     f"-binary={binary_path}",
-                    f"-workdir={tmp_dir.absolute()}",
+                    f"-workdir={Path(tmp_dir).absolute()}",
                 ]
 
                 p = Popen(clang_format_call, stdin=PIPE, stdout=PIPE, stderr=PIPE)
