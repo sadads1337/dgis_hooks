@@ -32,6 +32,7 @@ dgis-clang-format-diff = "dgis.hooks.scripts:entry_point"
 # Packaged plugins.
 [project.entry-points."dgis.hooks.plugins"]
 BranchCheckPlugin = "dgis.hooks.plugins.packaged.branch_check:BranchCheckPlugin"
+ClangFormatCheckPlugin = "dgis.hooks.plugins.packaged.clang_format_check:ClangFormatCheckPlugin"
 JsonCheckPlugin = "dgis.hooks.plugins.packaged.json_check:JsonCheckPlugin"
 UTF8CheckPlugin = "dgis.hooks.plugins.packaged.utf8_check:UTF8CheckPlugin"
 XmlCheckPlugin = "dgis.hooks.plugins.packaged.xml_check:XmlCheckPlugin"
