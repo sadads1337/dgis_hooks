@@ -92,4 +92,8 @@ class ClangFormatCheckPlugin(Plugin):
 
         if result.data:
             for file_path, (out, err) in result.data.items():
-                context.log.error(f"Check JSON failed for file: '{file_path}' with out:\n '{out}' and err:\n '{err}'")
+                context.log.error(f"Check formatting failed for file: '{file_path}'")
+                if out:
+                    context.log.error(f"With stdout:\n{out}")
+                if err:
+                    context.log.error(f"With stderr:\n{err}\n")
