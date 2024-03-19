@@ -40,7 +40,7 @@ class GitRef:
 
     def diff(self, git_repo: Repo):
         commit = git_repo.commit(self.old_rev)
-        return commit.diff(self.new_rev)
+        return commit.diff(self.new_rev, create_patch=True)
 
 
 def parse_ref(line: str) -> GitRef:

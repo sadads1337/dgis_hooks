@@ -57,12 +57,10 @@ class ClangFormatCheckPlugin(Plugin):
 
                 diff_file_path = file_path.with_suffix(".diff")
                 with open(diff_file_path, "bw") as file:
-                    if diff_content.a_blob and diff_content.b_blob:
-                        binary_diff = context.repo.git.diff("-U0", diff_content.a_blob.hexsha,
-                                                            diff_content.b_blob.hexsha).encode()
-                    elif not diff_content.a_blob and diff_content.b_blob:
-                        binary_diff = context.repo.git.diff("--no-index", "--", "/dev/null", file_path.absolute(),
-                                                            with_exceptions=False).encode()
+                    if not isinstance(diff_content.diff, (bytearray, bytes)):
+                        binary_diff = diff_content.diff.encode()
+                    else:
+                        binary_diff = diff_content.diff
                     file.write(binary_diff)
 
                 clang_format_call = [
