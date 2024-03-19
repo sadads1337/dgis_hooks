@@ -74,6 +74,9 @@ class ClangFormatCheckPlugin(Plugin):
                     f"-workdir={Path(tmp_dir).absolute()}",
                 ]
 
+                if context.log:
+                    context.log.debug(f"Calling clang-format tool: {' '.join(clang_format_call)}")
+
                 p = Popen(clang_format_call, stdin=PIPE, stdout=PIPE, stderr=PIPE)
                 out, err = p.communicate()
                 if p.returncode != 0:
