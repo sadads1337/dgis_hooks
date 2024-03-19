@@ -11,6 +11,8 @@ def make_test_repo(repo_path: Path, *args, **kwargs) -> Repo:
 def make_and_commit_test_file(git_repo: Repo, file_relative_path: Path, file_content: Optional[str] = None,
                               amend: bool = False):
     file_path = git_repo.working_tree_dir / file_relative_path
+    if len(file_path.parents) > 0 and not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True)
     file_path.touch()
     if file_content:
         with open(file_path, "w") as file:

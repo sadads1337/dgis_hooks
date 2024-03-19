@@ -43,8 +43,10 @@ class ClangFormatCheckPlugin(Plugin):
                 if diff_content.deleted_file:
                     continue
 
-                file_path = Path(tmp_dir) / diff_content.b_blob.name
+                file_path = Path(tmp_dir) / diff_content.b_path
                 if file_path.suffix in [".cpp", ".c", ".h", ".hpp", ".hqt"]:
+                    if len(file_path.parents) > 0 and not file_path.parent.exists():
+                        file_path.parent.mkdir(parents=True)
                     with open(file_path, "wb") as file:
                         file.write(context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode())
                 else:
@@ -53,7 +55,7 @@ class ClangFormatCheckPlugin(Plugin):
                 if context.log:
                     context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
 
-                diff_file_path = (Path(tmp_dir) / file_path.name).with_suffix(".diff")
+                diff_file_path = file_path.with_suffix(".diff")
                 with open(diff_file_path, "bw") as file:
                     if diff_content.a_blob and diff_content.b_blob:
                         binary_diff = context.repo.git.diff("-U0", diff_content.a_blob.hexsha,
