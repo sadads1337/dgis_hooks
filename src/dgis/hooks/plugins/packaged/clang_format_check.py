@@ -1,4 +1,3 @@
-import shutil
 import tempfile
 
 from pathlib import Path
@@ -25,6 +24,9 @@ class ClangFormatCheckPlugin(Plugin):
         binary_path = "clang-format"
 
         with tempfile.TemporaryDirectory() as tmp_dir:
+            if context.log:
+                context.log.debug(f"Running in temp dir: '{tmp_dir}'")
+
             clang_format_style = cls._find_clang_format_style(context)
             if clang_format_style:
                 if context.log:
@@ -41,12 +43,12 @@ class ClangFormatCheckPlugin(Plugin):
                 if diff_content.deleted_file:
                     continue
 
-                repo_file_path = Path(context.repo.working_dir) / diff_content.b_path
-                file_path = Path(tmp_dir) / repo_file_path.name
-                if file_path.suffix not in [".cpp", ".c", ".h", ".hpp", ".hqt"]:
-                    continue
+                file_path = Path(tmp_dir) / diff_content.b_blob.name
+                if file_path.suffix in [".cpp", ".c", ".h", ".hpp", ".hqt"]:
+                    with open(file_path, "wb") as file:
+                        file.write(context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode())
                 else:
-                    shutil.copy2(repo_file_path, file_path)
+                    continue
 
                 if context.log:
                     context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
