@@ -17,6 +17,9 @@ class GitRef:
     new_rev: str
     ref: str
 
+    def __str__(self):
+        return f"old_rev: {self.old_rev} new_rev: {self.new_rev} ref: {self.ref}"
+
     def status(self, git_repo: Repo) -> RefStatus:
         # https://git-scm.com/docs/git-receive-pack#_pre_receive_hook
         # Refs to be created will have sha1-old equal to 0{40},

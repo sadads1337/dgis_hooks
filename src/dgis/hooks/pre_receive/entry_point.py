@@ -53,7 +53,9 @@ def _main() -> ExitStatus:
         # Doc: https://docs.python.org/3/library/fileinput.html
         with fileinput.input("-") as file:
             for line in file:
-                context = PluginContext(parse_ref(line), git_repo, log)
+                ref = parse_ref(line)
+                log_info(str(ref))
+                context = PluginContext(ref, git_repo, log)
                 for plugin in plugins:
                     with execute_plugin(plugin, context) as result:
                         if result.status == PluginResultStatus.Failed:
