@@ -98,4 +98,4 @@ class ClangFormatCheckPlugin(Plugin):
                 if out:
                     context.log.error(f"With stdout:\n{out}")
                 if err:
-                    context.log.error(f"With stderr:\n{err}\n")
+                    context.log.error(f"With stderr:\n{err}")
