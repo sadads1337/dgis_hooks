@@ -42,7 +42,15 @@ class GitRef:
             return RefStatus.Updated
 
     def diff(self, git_repo: Repo):
-        commit = git_repo.commit(self.old_rev)
+        if self.status(git_repo) in (RefStatus.ForceUpdated, RefStatus.Created):
+            rev_list = git_repo.git.rev_list(self.new_rev, "--not", "--all")
+            if rev_list:
+                rev_list = rev_list.split('\n')
+                commit = git_repo.commit(f"{rev_list[0]}~1")
+            else:
+                commit = git_repo.commit()
+        else:
+            commit = git_repo.commit(self.old_rev)
         return commit.diff(self.new_rev, create_patch=True)
 
 
