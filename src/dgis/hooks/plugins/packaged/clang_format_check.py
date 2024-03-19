@@ -5,20 +5,18 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import Optional
 
-from git import Repo
-
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
 
 
 class ClangFormatCheckPlugin(Plugin):
     @classmethod
-    def _find_clang_format_style_path(cls, repo: Repo) -> Optional[Path]:
-        clang_format_style_path = None
-        for obj in repo.tree("HEAD").traverse():
+    def _find_clang_format_style(cls, context: PluginContext) -> Optional[str]:
+        clang_format_style = None
+        for obj in context.repo.tree("HEAD").traverse():
             if obj.type == "blob" and obj.name == ".clang-format":
-                clang_format_style_path = obj.abspath
+                clang_format_style = obj.hexsha
                 break
-        return Path(clang_format_style_path)
+        return clang_format_style
 
     @classmethod
     def execute(cls, context: PluginContext) -> PluginResult:
@@ -27,9 +25,12 @@ class ClangFormatCheckPlugin(Plugin):
         binary_path = "clang-format"
 
         with tempfile.TemporaryDirectory() as tmp_dir:
-            clang_format_style_path = cls._find_clang_format_style_path(context.repo)
-            if clang_format_style_path:
-                shutil.copy2(clang_format_style_path, Path(tmp_dir) / clang_format_style_path.name)
+            clang_format_style = cls._find_clang_format_style(context)
+            if clang_format_style:
+                if context.log:
+                    context.log.debug(f"Found .clang-format HEXSHA: '{clang_format_style}'")
+                with open(Path(tmp_dir) / ".clang-format", "wb") as file:
+                    file.write(context.repo.git.cat_file("blob", clang_format_style).encode())
             else:
                 if context.log:
                     context.log.warning(f"No clang-format style file found while executing '{cls.__name__}'")

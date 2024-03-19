@@ -99,6 +99,21 @@ def test_cpp_non_empty_files(tmp_path, cpp_content):
         assert result.status == PluginResultStatus.Ok
 
 
+@pytest.mark.parametrize("cpp_content", _g_cpp_files)
+def test_cpp_non_empty_files_no_format(tmp_path, cpp_content):
+    git_repo_path = tmp_path / "tmp-rep"
+    git_repo = Repo.init(git_repo_path)
+
+    make_and_commit_test_file(git_repo, Path("test.cpp"))
+    make_and_commit_test_file(git_repo, Path("test.cpp"), cpp_content)
+
+    ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
+    context = PluginContext(ref, git_repo, None)
+
+    with execute_plugin(ClangFormatCheckPlugin, context) as result:
+        assert result.status == PluginResultStatus.Ok
+
+
 @pytest.mark.parametrize("cpp_content", _g_cpp_files_ivalid_format)
 def test_cpp_non_empty_files_invalid_format(tmp_path, cpp_content):
     git_repo_path = tmp_path / "tmp-rep"
