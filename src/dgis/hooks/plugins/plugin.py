@@ -53,6 +53,6 @@ def execute_plugin(plugin_type: Type[Plugin], plugin_context: PluginContext):
     except Exception as error:
         if plugin_context.log:
             plugin_context.log.error(f"Exception while running '{plugin_type}: {error}'")
-        yield PluginResult(PluginResultStatus.Failed, None)
+        yield result
     finally:
         plugin_type.post_execute(plugin_context, result)
