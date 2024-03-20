@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from git import Repo
+from git import Repo, NULL_TREE
 
 
 class RefStatus(Enum):
@@ -47,18 +47,15 @@ class GitRef:
             if rev_list:
                 rev_list = rev_list.split('\n')
                 commit = git_repo.commit(f"{rev_list[0]}~1")
+                return commit.diff(self.new_rev, create_patch=True)
             else:
-                commit = git_repo.commit()
+                commit = git_repo.commit(self.new_rev)
+                return commit.diff(NULL_TREE, create_patch=True)
         else:
             commit = git_repo.commit(self.old_rev)
-        return commit.diff(self.new_rev, create_patch=True)
+            return commit.diff(self.new_rev, create_patch=True)
 
 
 def parse_ref(line: str) -> GitRef:
     old_rev, new_rev, ref = line.split()
     return GitRef(old_rev, new_rev, ref)
-
-
-def get_diff(ref: GitRef, git_repo: Repo) -> str:
-    diff = git_repo.git.diff_tree(ref.old_rev, ref.new_rev, "-r")
-    return diff
