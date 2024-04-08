@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dgis_hooks"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
     { name = "Ilya Makarov", email="i.o.makarov@2gis.ru" },
 ]
