@@ -1,6 +1,7 @@
 import re
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
+from dgis.hooks.utility.git import RefStatus
 
 
 class BranchCheckPlugin(Plugin):
@@ -10,6 +11,9 @@ class BranchCheckPlugin(Plugin):
     def execute(cls, context: PluginContext) -> PluginResult:
         if context.log:
             context.log.debug(f"Executing '{cls.__name__}' for ref: '{context.ref.ref}'")
+
+        if context.ref.status(context.repo) == RefStatus.Deleted:
+            return PluginResult(PluginResultStatus.Ok, None)
 
         status = PluginResultStatus.Ok if cls._allowed_symbols_regex.search(context.ref.ref) \
             else PluginResultStatus.Failed
