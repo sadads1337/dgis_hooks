@@ -16,6 +16,9 @@ class XmlCheckPlugin(Plugin):
             if diff_content.deleted_file:
                 continue
 
+            if diff_content.renamed_file and not diff_content.b_blob:
+                continue
+
             file_path = Path(context.repo.working_dir) / diff_content.b_path
             if file_path.suffix != ".xml":
                 continue

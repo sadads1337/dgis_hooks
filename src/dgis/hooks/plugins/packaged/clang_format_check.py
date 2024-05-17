@@ -43,6 +43,9 @@ class ClangFormatCheckPlugin(Plugin):
                 if diff_content.deleted_file:
                     continue
 
+                if diff_content.renamed_file and not diff_content.b_blob:
+                    continue
+
                 file_path = Path(tmp_dir) / diff_content.b_path
                 if file_path.suffix in [".cpp", ".c", ".h", ".hpp", ".hqt"]:
                     if len(file_path.parents) > 0 and not file_path.parent.exists():
