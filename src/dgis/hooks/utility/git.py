@@ -48,8 +48,9 @@ class GitRef:
         elif self.status(git_repo) in (RefStatus.ForceUpdated, RefStatus.Created):
             rev_list = git_repo.git.rev_list(self.new_rev, "--not", "--all")
             if rev_list:
+                # Commit objects are in reverse chronological order.
                 rev_list = rev_list.split('\n')
-                commit = git_repo.commit(f"{rev_list[0]}~1")
+                commit = git_repo.commit(f"{rev_list[-1]}~1")
                 return commit.diff(self.new_rev, create_patch=True, unified=0)
             else:
                 commit = git_repo.commit(self.new_rev)
