@@ -48,7 +48,7 @@ class GitRef:
         status = self.status(git_repo)
         if status == RefStatus.Deleted:
             return []
-        elif self.status(git_repo) in (RefStatus.ForceUpdated, RefStatus.Created):
+        elif status in (RefStatus.ForceUpdated, RefStatus.Created):
             rev_list = git_repo.git.rev_list(self.new_rev, "--not", "--all")
             if rev_list:
                 # Commit objects are in reverse chronological order.
