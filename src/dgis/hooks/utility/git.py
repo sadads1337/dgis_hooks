@@ -50,13 +50,13 @@ class GitRef:
             if rev_list:
                 rev_list = rev_list.split('\n')
                 commit = git_repo.commit(f"{rev_list[0]}~1")
-                return commit.diff(self.new_rev, create_patch=True, U=0)
+                return commit.diff(self.new_rev, create_patch=True, unified=0)
             else:
                 commit = git_repo.commit(self.new_rev)
-                return commit.diff(NULL_TREE, create_patch=True, U=0)
+                return commit.diff(NULL_TREE, create_patch=True, unified=0)
         else:
             commit = git_repo.commit(self.old_rev)
-            return commit.diff(self.new_rev, create_patch=True, U=0)
+            return commit.diff(self.new_rev, create_patch=True, unified=0)
 
 
 def parse_ref(line: str) -> GitRef:
