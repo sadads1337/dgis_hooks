@@ -11,6 +11,13 @@ class RefStatus(Enum):
     Updated = 3
 
 
+# https://git-scm.com/docs/git-receive-pack#_pre_receive_hook
+# Refs to be created will have sha1-old equal to 0{40},
+# while refs to be deleted will have sha1-new equal to 0{40},
+# otherwise sha1-old and sha1-new should be valid objects in the repository.
+g_zero_rev = "0" * 40
+
+
 @dataclass
 class GitRef:
     old_rev: str
@@ -21,11 +28,7 @@ class GitRef:
         return f"old_rev: {self.old_rev} new_rev: {self.new_rev} ref: {self.ref}"
 
     def status(self, git_repo: Repo) -> RefStatus:
-        # https://git-scm.com/docs/git-receive-pack#_pre_receive_hook
-        # Refs to be created will have sha1-old equal to 0{40},
-        # while refs to be deleted will have sha1-new equal to 0{40},
-        # otherwise sha1-old and sha1-new should be valid objects in the repository.
-        zero_rev = "0" * 40
+        zero_rev = g_zero_rev
 
         if self.new_rev == zero_rev:
             return RefStatus.Deleted
