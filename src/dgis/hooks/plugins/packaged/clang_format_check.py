@@ -5,6 +5,7 @@ from subprocess import PIPE, Popen
 from typing import Optional
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
+from dgis.hooks.utility.format import is_supported_cpp_file_extension
 
 
 class ClangFormatCheckPlugin(Plugin):
@@ -47,7 +48,7 @@ class ClangFormatCheckPlugin(Plugin):
                     continue
 
                 file_path = Path(tmp_dir) / diff_content.b_path
-                if file_path.suffix in [".cpp", ".c", ".h", ".hpp", ".hqt"]:
+                if is_supported_cpp_file_extension(file_path.suffix):
                     if len(file_path.parents) > 0 and not file_path.parent.exists():
                         file_path.parent.mkdir(parents=True)
                     with open(file_path, "wb") as file:
