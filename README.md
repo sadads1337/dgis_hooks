@@ -3,6 +3,7 @@
 ![GitHub License](https://img.shields.io/github/license/sadads1337/dgis_hooks)
 ![GitHub Release](https://img.shields.io/github/v/release/sadads1337/dgis_hooks?include_prereleases)
 ![Build and test](https://github.com/sadads1337/dgis_hooks/actions/workflows/python-package.yml/badge.svg)
+![MyPy and audit](https://github.com/sadads1337/dgis_hooks/actions/workflows/mypy-audit.yml/badge.svg)
 
 Small lightweight package for GIT hooks management.
 
