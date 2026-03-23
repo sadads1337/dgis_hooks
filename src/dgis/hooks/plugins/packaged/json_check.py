@@ -26,9 +26,8 @@ class JsonCheckPlugin(Plugin):
 
             if context.log:
                 context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
-
-            json_content = context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode()
-            file = io.BytesIO(json_content)
+            json_content = context.repo.git.cat_file("blob", diff_content.b_blob.hexsha)
+            file = io.StringIO(json_content)
             try:
                 simplejson.load(file)
             except ValueError as error:
