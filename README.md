@@ -52,6 +52,16 @@ To run all tests call
 pytest .
 ```
 
+### Code style
+
+We use Black to format project code. Install dependencies (or at least Black) and run:
+
+```bash
+black . # or black <path_to_file_or_dir> to format specific file or dir
+```
+
+Black configuration is available in `pyproject.toml`.
+
 ## Run
 
 There are 2 entry points:
