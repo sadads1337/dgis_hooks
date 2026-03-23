@@ -1,4 +1,5 @@
 import tempfile
+import sys
 
 from pathlib import Path
 from subprocess import PIPE, Popen
@@ -6,6 +7,7 @@ from typing import Optional
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
 from dgis.hooks.utility.format import is_supported_cpp_file_extension
+from dgis.hooks.utility.env import setup_env
 
 
 class ClangFormatCheckPlugin(Plugin):
@@ -23,6 +25,12 @@ class ClangFormatCheckPlugin(Plugin):
         errors = {}
 
         binary_path = "clang-format"
+
+        script_cmd = [sys.executable, "-m", "dgis.hooks.scripts.clang_format_diff"]
+
+        # Prepare environment for subprocess so that the child python process
+        # can import the local `dgis` package when tests run without package install.
+        env = setup_env()
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             if context.log:
@@ -67,8 +75,7 @@ class ClangFormatCheckPlugin(Plugin):
                         binary_diff = diff_content.diff
                     file.write(binary_diff)
 
-                clang_format_call = [
-                    "dgis-clang-format-diff",
+                clang_format_call = script_cmd + [
                     "-style=file",
                     f"-filesrc={file_path.absolute()}",
                     f"-filediff={diff_file_path.absolute()}",
@@ -77,9 +84,9 @@ class ClangFormatCheckPlugin(Plugin):
                 ]
 
                 if context.log:
-                    context.log.debug(f"Calling clang-format tool: {' '.join(clang_format_call)}")
+                    context.log.debug(f"Calling clang-format tool: {' '.join(map(str, clang_format_call))}")
 
-                p = Popen(clang_format_call, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+                p = Popen(clang_format_call, stdin=PIPE, stdout=PIPE, stderr=PIPE, env=env)
                 out, err = p.communicate()
                 if p.returncode != 0:
                     errors[file_path] = (out.decode(), err.decode())
