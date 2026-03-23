@@ -1,0 +1,110 @@
+import tempfile
+import sys
+
+from pathlib import Path
+from subprocess import PIPE, Popen
+from typing import Optional
+
+from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
+from dgis.hooks.utility.env import setup_env
+
+
+class BlackFormatCheckPlugin(Plugin):
+    _python_extension = ".py"
+
+    @classmethod
+    def _find_black_confing(cls, context: PluginContext) -> Optional[str]:
+        black_config = None
+        for obj in context.repo.tree("HEAD").traverse():
+            if obj.type == "blob" and obj.name == "pyproject.toml":
+                black_config = obj.hexsha
+                break
+        return black_config
+
+    @classmethod
+    def execute(cls, context: PluginContext) -> PluginResult:
+        errors = {}
+
+        # Always invoke black via the current Python interpreter to avoid PATH issues
+        script_cmd = [sys.executable, "-m", "black"]
+
+        # Prepare environment for subprocess so the child process can import local packages if needed
+        env = setup_env()
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            if context.log:
+                context.log.debug(f"Running in temp dir: '{tmp_dir}'")
+
+            black_config = cls._find_black_confing(context)
+            if black_config:
+                if context.log:
+                    context.log.debug(f"Found black config (pyproject.toml) HEXSHA: '{black_config}'")
+                with open(Path(tmp_dir) / "pyproject.toml", "wb") as file:
+                    file.write(context.repo.git.cat_file("blob", black_config).encode())
+            else:
+                if context.log:
+                    context.log.warning(f"No black config (pyproject.toml) file found while executing '{cls.__name__}'")
+                return PluginResult(PluginResultStatus.Ok, None)
+
+            diff = context.ref.diff(context.repo)
+            for diff_content in diff:
+                if diff_content.deleted_file:
+                    continue
+
+                if diff_content.renamed_file and not diff_content.b_blob:
+                    continue
+
+                if not diff_content.b_path.endswith(cls._python_extension):
+                    continue
+
+                file_path = Path(tmp_dir) / diff_content.b_path
+                if len(file_path.parents) > 0 and not file_path.parent.exists():
+                    file_path.parent.mkdir(parents=True)
+
+                with open(file_path, "wb") as file:
+                    file.write(context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode())
+
+                if context.log:
+                    context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
+
+                # Call black in --diff mode to detect formatting changes
+                black_call = script_cmd + ["--diff", str(file_path)]
+                if context.log:
+                    context.log.debug(f"Calling black tool: {' '.join(map(str, black_call))}")
+
+                p = Popen(black_call, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=str(Path(tmp_dir)), env=env)
+                out, err = p.communicate()
+
+                # Black prints a diff to stdout when it would reformat a file.
+                # Treat presence of stdout (non-empty) as a formatting error.
+                if out and out.strip():
+                    try:
+                        out_dec = out.decode()
+                    except Exception:
+                        out_dec = None
+                    try:
+                        err_dec = err.decode() if err else None
+                    except Exception:
+                        err_dec = None
+                    errors[file_path] = (out_dec, err_dec)
+
+        return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
+
+    @classmethod
+    def post_execute(cls, context: PluginContext, result: PluginResult):
+        if not context.log:
+            return
+
+        log_func = context.log.info if result.status == PluginResultStatus.Ok else context.log.error
+        log_func(f"Check '{cls.__name__}' finished with status: '{result.status}'")
+
+        if result.status == PluginResultStatus.Ok:
+            return
+
+        if result.data:
+            for file_path, (out, err) in result.data.items():
+                context.log.error(f"Check formatting failed for file: '{file_path}'")
+                if out:
+                    context.log.error(f"With stdout:\n{out}")
+                if err:
+                    context.log.error(f"With stderr:\n{err}")

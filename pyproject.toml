@@ -36,6 +36,7 @@ ClangFormatCheckPlugin = "dgis.hooks.plugins.packaged.clang_format_check:ClangFo
 JsonCheckPlugin = "dgis.hooks.plugins.packaged.json_check:JsonCheckPlugin"
 UTF8CheckPlugin = "dgis.hooks.plugins.packaged.utf8_check:UTF8CheckPlugin"
 XmlCheckPlugin = "dgis.hooks.plugins.packaged.xml_check:XmlCheckPlugin"
+BlackFormatCheckPlugin = "dgis.hooks.plugins.packaged.black_format_check:BlackFormatCheckPlugin"
 
 [project.urls]
 Homepage = "https://github.com/sadads1337/dgis_hooks"

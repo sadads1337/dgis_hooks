@@ -27,6 +27,13 @@ def _main() -> ExitStatus:
         "If empty then hook enables all plugins from namespaces "
         "dgis.hooks.plugins and dgis.hooks.plugins.packaged.",
     )
+    parser.add_argument(
+        "--ignore-plugins",
+        nargs="*",
+        default=["BlackFormatCheckPlugin"],
+        help="Optional list of plugin names to ignore (by plugin class/entry-point name). "
+        "Temporary defaults to ['BlackFormatCheckPlugin'] since its experimental.",
+    )
     args = parser.parse_args()
 
     log = init_log(__package__)
@@ -38,6 +45,16 @@ def _main() -> ExitStatus:
         plugins = discover_and_load_plugins(enabled_plugins)
         for plugin in plugins:
             log_info(f"Found plugin: '{plugin.__name__}'")
+
+        ignore_plugins = args.ignore_plugins if args.ignore_plugins else []
+        if ignore_plugins:
+            filtered = []
+            for plugin in plugins:
+                if plugin.__name__ in ignore_plugins:
+                    log_info(f"Ignoring plugin: '{plugin.__name__}'")
+                else:
+                    filtered.append(plugin)
+            plugins = filtered
 
     if not plugins:
         log_warning("No plugins found, nothing to check")
