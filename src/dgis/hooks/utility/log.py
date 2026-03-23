@@ -1,6 +1,5 @@
 import logging
 
-
 _log = None
 
 
@@ -12,7 +11,7 @@ def init_log(name: str):
     _log.setLevel(logging.INFO)
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
-    formatter = logging.Formatter('[%(name)s][%(levelname)s] %(message)s')
+    formatter = logging.Formatter("[%(name)s][%(levelname)s] %(message)s")
     ch.setFormatter(formatter)
     _log.addHandler(ch)
     return _log

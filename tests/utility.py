@@ -10,8 +10,9 @@ def make_test_repo(repo_path: Path, *args, **kwargs) -> Repo:
     return git_repo
 
 
-def make_and_commit_test_file(git_repo: Repo, file_relative_path: Path, file_content: Optional[str] = None,
-                              amend: bool = False):
+def make_and_commit_test_file(
+    git_repo: Repo, file_relative_path: Path, file_content: Optional[str] = None, amend: bool = False
+):
     file_path = git_repo.working_tree_dir / file_relative_path
     if len(file_path.parents) > 0 and not file_path.parent.exists():
         file_path.parent.mkdir(parents=True)
@@ -26,8 +27,9 @@ def make_and_commit_test_file(git_repo: Repo, file_relative_path: Path, file_con
         git_repo.git.commit("-m", f"'commit {str(file_path)}'")
 
 
-def move_and_commit_test_file(git_repo: Repo, src_file_relative_path: Path, dst_file_relative_path: Path,
-                              amend: bool = False):
+def move_and_commit_test_file(
+    git_repo: Repo, src_file_relative_path: Path, dst_file_relative_path: Path, amend: bool = False
+):
     src_file_path = git_repo.working_tree_dir / src_file_relative_path
     dst_file_path = git_repo.working_tree_dir / dst_file_relative_path
 

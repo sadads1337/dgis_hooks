@@ -15,8 +15,9 @@ class BranchCheckPlugin(Plugin):
         if context.ref.status(context.repo) == RefStatus.Deleted:
             return PluginResult(PluginResultStatus.Ok, None)
 
-        status = PluginResultStatus.Ok if cls._allowed_symbols_regex.search(context.ref.ref) \
-            else PluginResultStatus.Failed
+        status = (
+            PluginResultStatus.Ok if cls._allowed_symbols_regex.search(context.ref.ref) else PluginResultStatus.Failed
+        )
 
         return PluginResult(status, None)
 

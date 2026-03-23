@@ -14,16 +14,14 @@ _g_valid_branch_names = [
     "test-ABC-#-aBc_123",
     "test-ABC-123-aBc_123",
     "release-123.567",
-    "stable/release-123.567"
-    "stable_release-123"
+    "stable/release-123.567" "stable_release-123",
 ]
 
 _g_invalid_branch_names = [
     "$",
     "test-ABC-123-aBc123!",
     "release-123.!567",
-    "stable/release-123\"567\""
-    "stable/release-\'"
+    'stable/release-123"567"' "stable/release-'",
 ]
 
 

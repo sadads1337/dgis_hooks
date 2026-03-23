@@ -10,27 +10,26 @@ from dgis.hooks.utility.git import GitRef
 
 from tests.utility import make_and_commit_test_file
 
-
 _g_valid_xml = [
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag/>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag></tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag/></tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag attr=\"str\"/></tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag>value</inner_tag></tag>",
+    '<?xml version="1.0" encoding="UTF-8"?><tag/>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag></tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag/></tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag attr="str"/></tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag>value</inner_tag></tag>',
 ]
 
 _g_invalid_xml = [
     "<",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag/><tag/>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag<tag/>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag></tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag attr/></tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag attrstr/></tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag attr=str/></tag>",
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><tag><inner_tag>value<inner_tag></tag>",
+    '<?xml version="1.0" encoding="UTF-8"?><tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag/><tag/>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag<tag/>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag></tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag attr/></tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag attrstr/></tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag attr=str/></tag>',
+    '<?xml version="1.0" encoding="UTF-8"?><tag><inner_tag>value<inner_tag></tag>',
 ]
 
 

@@ -17,11 +17,13 @@ IndentWidth: 4
 AllowShortFunctionsOnASingleLine: None
 """
 
-_g_cpp_files = ["""
+_g_cpp_files = [
+    """
 int main() {
     return 0;
 }
-""", """
+""",
+    """
 struct S {
     int f() {
         const auto l = []() { return 0; };

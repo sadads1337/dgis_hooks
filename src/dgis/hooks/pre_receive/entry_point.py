@@ -19,10 +19,14 @@ from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
 def _main() -> ExitStatus:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('plugins', nargs='*', default=[],
-                        help="Optional list of enabled plugins. "
-                             "If empty then hook enables all plugins from namespaces "
-                             "dgis.hooks.plugins and dgis.hooks.plugins.packaged.")
+    parser.add_argument(
+        "plugins",
+        nargs="*",
+        default=[],
+        help="Optional list of enabled plugins. "
+        "If empty then hook enables all plugins from namespaces "
+        "dgis.hooks.plugins and dgis.hooks.plugins.packaged.",
+    )
     args = parser.parse_args()
 
     log = init_log(__package__)

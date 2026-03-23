@@ -15,9 +15,11 @@ class ExitStatus(IntEnum):
 def get_version() -> str:
     if sys.version_info < (3, 10):
         from importlib_metadata import version
+
         return version("dgis_hooks")
     else:
         from importlib.metadata import version
+
         return version("dgis_hooks")
 
 

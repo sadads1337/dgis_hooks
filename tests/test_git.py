@@ -19,8 +19,9 @@ def test_parse_ref_valid_string(tmp_path, line):
     assert ref.ref == "789"
 
 
-@pytest.mark.parametrize("line, expected", [(f"{'0' * 40} 456 789", RefStatus.Created),
-                                            (f"123 {'0' * 40} 789", RefStatus.Deleted)])
+@pytest.mark.parametrize(
+    "line, expected", [(f"{'0' * 40} 456 789", RefStatus.Created), (f"123 {'0' * 40} 789", RefStatus.Deleted)]
+)
 def test_ref_status_created_deleted(tmp_path, line, expected):
     ref = parse_ref(line)
     git_repo_path = tmp_path / "tmp-rep"

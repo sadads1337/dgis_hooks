@@ -10,29 +10,27 @@ from dgis.hooks.utility.git import GitRef
 
 from tests.utility import make_and_commit_test_file
 
-
 _g_valid_json = [
     "{}",
-    "{\"attr\": \"str_value\"}",
-    "{\"attr\": 1}",
-    "{\"attr\": 1.0}",
-    "{\"attr\": []}",
-    "{\"attr\": [\"str\", \"other_str\"]}",
-    "{\"attr\": [1, 2, 3]}",
-    "{\"attr\": { \"other_attr\": [], \"another_attr\": 1.0 }}",
+    '{"attr": "str_value"}',
+    '{"attr": 1}',
+    '{"attr": 1.0}',
+    '{"attr": []}',
+    '{"attr": ["str", "other_str"]}',
+    '{"attr": [1, 2, 3]}',
+    '{"attr": { "other_attr": [], "another_attr": 1.0 }}',
 ]
 
 _g_invalid_json = [
-    ""
-    "}",
+    "" "}",
     "{{}",
-    "{\"attr: \"str_value\"}",
-    "{\"attr\" \"str_value\"}",
-    "{\"attr\": str_value}",
-    "{\"attr\": 1abc}",
-    "{\"attr\": [[]}",
-    "{\"attr\": [}",
-    "{\"attr\": { abc }}",
+    '{"attr: "str_value"}',
+    '{"attr" "str_value"}',
+    '{"attr": str_value}',
+    '{"attr": 1abc}',
+    '{"attr": [[]}',
+    '{"attr": [}',
+    '{"attr": { abc }}',
 ]
 
 

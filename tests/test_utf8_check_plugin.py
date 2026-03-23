@@ -6,12 +6,11 @@ from dgis.hooks.plugins.packaged.utf8_check import UTF8CheckPlugin
 from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute_plugin
 from dgis.hooks.utility.git import GitRef
 
-
 _g_strings = [
     "",
     "such a long normal string",
     "such a long \n normal string \n with line breaks",
-    "utf emoji list 😀😅🤣🙃😇"
+    "utf emoji list 😀😅🤣🙃😇",
 ]
 
 

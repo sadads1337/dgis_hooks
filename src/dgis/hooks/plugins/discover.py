@@ -9,6 +9,7 @@ def discover_and_load_plugins(enabled_plugins: List[str]) -> List[Any]:
     else:
         from importlib.metadata import entry_points
     discovered_plugins = entry_points(group=__package__)
-    filtered_plugins = filter(lambda pl: pl.name in enabled_plugins, discovered_plugins) if enabled_plugins \
-        else discovered_plugins
+    filtered_plugins = (
+        filter(lambda pl: pl.name in enabled_plugins, discovered_plugins) if enabled_plugins else discovered_plugins
+    )
     return list(map(lambda pl: pl.load(), filtered_plugins))
