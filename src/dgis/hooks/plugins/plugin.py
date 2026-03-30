@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum
 from logging import Logger
-from typing import Optional, Any, Type
+from typing import Optional, Any, Type, List
 
 from git import Repo
 
@@ -15,9 +15,17 @@ class PluginResultStatus(Enum):
 
 
 @dataclass
+class PluginResultPayload:
+    stdout: Any
+    stderr: Any
+    diff: Any
+    file: Any
+
+
+@dataclass
 class PluginResult:
     status: PluginResultStatus
-    data: Any
+    payloads: Optional[List[PluginResultPayload]]
 
 
 @dataclass

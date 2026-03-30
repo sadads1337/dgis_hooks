@@ -5,7 +5,7 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import Optional
 
-from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
+from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 from dgis.hooks.utility.format import is_supported_cpp_file_extension
 from dgis.hooks.utility.env import setup_env
 
@@ -22,7 +22,7 @@ class ClangFormatCheckPlugin(Plugin):
 
     @classmethod
     def execute(cls, context: PluginContext) -> PluginResult:
-        errors = {}
+        payloads = None
 
         binary_path = "clang-format"
 
@@ -89,9 +89,23 @@ class ClangFormatCheckPlugin(Plugin):
                 p = Popen(clang_format_call, stdin=PIPE, stdout=PIPE, stderr=PIPE, env=env)
                 out, err = p.communicate()
                 if p.returncode != 0:
-                    errors[file_path] = (out.decode(), err.decode())
+                    if not payloads:
+                        payloads = [
+                            PluginResultPayload(
+                                stdout=out.decode(), stderr=err.decode(), diff=out.decode(), file=file_path
+                            )
+                        ]
+                    else:
+                        payloads.append(
+                            PluginResultPayload(
+                                stdout=out.decode(), stderr=err.decode(), diff=out.decode(), file=file_path
+                            )
+                        )
 
-        return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
+        if not payloads:
+            return PluginResult(PluginResultStatus.Ok, None)
+
+        return PluginResult(PluginResultStatus.Failed, payloads)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
@@ -104,10 +118,10 @@ class ClangFormatCheckPlugin(Plugin):
         if result.status == PluginResultStatus.Ok:
             return
 
-        if result.data:
-            for file_path, (out, err) in result.data.items():
-                context.log.error(f"Check formatting failed for file: '{file_path}'")
-                if out:
-                    context.log.error(f"With stdout:\n{out}")
-                if err:
-                    context.log.error(f"With stderr:\n{err}")
+        if result.payloads:
+            for payload in result.payloads:
+                context.log.error(f"Check formatting failed for file: '{payload.file}'")
+                if payload.stdout:
+                    context.log.error(f"With stdout:\n{payload.stdout}")
+                if payload.stderr:
+                    context.log.error(f"With stderr:\n{payload.stderr}")

@@ -5,7 +5,7 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import Optional
 
-from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
+from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 from dgis.hooks.utility.env import setup_env
 
 
@@ -23,7 +23,7 @@ class BlackFormatCheckPlugin(Plugin):
 
     @classmethod
     def execute(cls, context: PluginContext) -> PluginResult:
-        errors = {}
+        payloads = None
 
         # Always invoke black via the current Python interpreter to avoid PATH issues
         script_cmd = [sys.executable, "-m", "black"]
@@ -80,15 +80,24 @@ class BlackFormatCheckPlugin(Plugin):
                 if out and out.strip():
                     try:
                         out_dec = out.decode()
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-except
                         out_dec = None
                     try:
                         err_dec = err.decode() if err else None
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-except
                         err_dec = None
-                    errors[file_path] = (out_dec, err_dec)
 
-        return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
+                    if not payloads:
+                        payloads = [PluginResultPayload(stdout=out_dec, stderr=err_dec, diff=out_dec, file=file_path)]
+                    else:
+                        payloads.append(
+                            PluginResultPayload(stdout=out_dec, stderr=err_dec, diff=out_dec, file=file_path)
+                        )
+
+        if not payloads:
+            return PluginResult(PluginResultStatus.Ok, None)
+
+        return PluginResult(PluginResultStatus.Failed, payloads)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
@@ -101,10 +110,10 @@ class BlackFormatCheckPlugin(Plugin):
         if result.status == PluginResultStatus.Ok:
             return
 
-        if result.data:
-            for file_path, (out, err) in result.data.items():
-                context.log.error(f"Check formatting failed for file: '{file_path}'")
-                if out:
-                    context.log.error(f"With stdout:\n{out}")
-                if err:
-                    context.log.error(f"With stderr:\n{err}")
+        if result.payloads:
+            for payload in result.payloads:
+                context.log.error(f"Check formatting failed for file: '{payload.file}'")
+                if payload.stdout:
+                    context.log.error(f"With stdout:\n{payload.stdout}")
+                if payload.stderr:
+                    context.log.error(f"With stderr:\n{payload.stderr}")

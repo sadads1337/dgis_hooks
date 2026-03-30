@@ -4,13 +4,13 @@ import simplejson
 
 from pathlib import Path
 
-from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
+from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 
 
 class JsonCheckPlugin(Plugin):
     @classmethod
     def execute(cls, context: PluginContext) -> PluginResult:
-        errors = {}
+        payloads = None
 
         diff = context.ref.diff(context.repo)
         for diff_content in diff:
@@ -31,9 +31,15 @@ class JsonCheckPlugin(Plugin):
             try:
                 simplejson.load(file)
             except ValueError as error:
-                errors[file_path] = error
+                if not payloads:
+                    payloads = [PluginResultPayload(stdout=error, stderr=None, diff=None, file=file_path)]
+                else:
+                    payloads.append(PluginResultPayload(stdout=error, stderr=None, diff=None, file=file_path))
 
-        return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
+        if not payloads:
+            return PluginResult(PluginResultStatus.Ok, None)
+
+        return PluginResult(PluginResultStatus.Failed, payloads)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
@@ -46,6 +52,6 @@ class JsonCheckPlugin(Plugin):
         if result.status == PluginResultStatus.Ok:
             return
 
-        if result.data:
-            for file_path, error in result.data.items():
-                context.log.error(f"Check JSON failed for file: '{file_path}' with error: '{error}'")
+        if result.payloads:
+            for payload in result.payloads:
+                context.log.error(f"Check JSON failed for file: '{payload.file}' with error: '{payload.stdout}'")

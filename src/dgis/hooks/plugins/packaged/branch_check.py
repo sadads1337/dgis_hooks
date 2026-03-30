@@ -1,6 +1,6 @@
 import re
 
-from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
+from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 from dgis.hooks.utility.git import RefStatus
 
 
@@ -19,7 +19,11 @@ class BranchCheckPlugin(Plugin):
             PluginResultStatus.Ok if cls._allowed_symbols_regex.search(context.ref.ref) else PluginResultStatus.Failed
         )
 
-        return PluginResult(status, None)
+        if status == PluginResultStatus.Failed:
+            stdout = f"Invalid symbols in ref/branch name: '{context.ref.ref}', only [a-zA-Z0-9_./#] allowed"
+            return PluginResult(PluginResultStatus.Failed, [PluginResultPayload(stdout=stdout, stderr=None, diff=None)])
+
+        return PluginResult(PluginResultStatus.Ok, None)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
@@ -32,4 +36,6 @@ class BranchCheckPlugin(Plugin):
         if result.status == PluginResultStatus.Ok:
             return
 
-        context.log.error(f"Invalid symbols in ref/branch name: '{context.ref.ref}', only [a-zA-Z0-9_./#] allowed")
+        # There is only 1 element if error happened, so we can just check the first one.
+        if result.payloads and result.payloads[0].stdout:
+            context.log.error(result.payloads[0].stdout)

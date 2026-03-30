@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultStatus
+from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 
 
 class UTF8CheckPlugin(Plugin):
@@ -8,7 +8,7 @@ class UTF8CheckPlugin(Plugin):
 
     @classmethod
     def execute(cls, context: PluginContext) -> PluginResult:
-        errors = {}
+        payloads = None
         diff = context.ref.diff(context.repo)
         for diff_content in diff:
             if diff_content.deleted_file:
@@ -30,9 +30,16 @@ class UTF8CheckPlugin(Plugin):
             try:
                 context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode()
             except UnicodeDecodeError as error:
-                errors["file_path"] = error
+                payload = PluginResultPayload(stdout=error, stderr=None, diff=None, file=file_path)
+                if not payloads:
+                    payloads = [payload]
+                else:
+                    payloads.append(payload)
 
-        return PluginResult(PluginResultStatus.Failed if errors else PluginResultStatus.Ok, errors)
+        if not payloads:
+            return PluginResult(PluginResultStatus.Ok, None)
+
+        return PluginResult(PluginResultStatus.Failed, payloads)
 
     @classmethod
     def post_execute(cls, context: PluginContext, result: PluginResult):
@@ -45,6 +52,6 @@ class UTF8CheckPlugin(Plugin):
         if result.status == PluginResultStatus.Ok:
             return
 
-        if result.data:
-            for file_path, error in result.data.items():
-                context.log.error(f"Check JSON failed for file: '{file_path}' with error: '{error}'")
+        if result.payloads:
+            for payload in result.payloads:
+                context.log.error(f"Check UTF-8 failed for file: '{payload.file}' with error: '{payload.stdout}'")
