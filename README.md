@@ -65,8 +65,9 @@ Black configuration is available in `pyproject.toml`.
 
 ## Run
 
-There are 2 entry points:
-- `dgis-pre-receive` - entry point to execute pre receive checks 
+There are 3 entry points:
+- `dgis-pre-receive` - entry point to execute pre receive checks
+- `dgis-gitlab-ci-run` - entry point to execute checks on gitlab CI/CD
 - `dgis-clang-format-diff` - entry point to execute clang-format
 
 Execute script with `--help` argument to get all available parameters.

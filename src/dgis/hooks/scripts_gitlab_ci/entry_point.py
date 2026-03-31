@@ -10,12 +10,15 @@ import os
 import sys
 
 from dgis.hooks.plugins.discover import discover_and_load_plugins
-from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute_plugin
+from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute_plugin, PluginResult
+from dgis.hooks.scripts_gitlab_ci.gitlab_reporter import GitLabReporter
 from dgis.hooks.utility.common import ExitStatus, get_version, timed_block
 from dgis.hooks.utility.git import GitRef
 from dgis.hooks.utility.log import init_log, log_info, log_warning, log_error, LogLevel, log_level_from_string
 
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
+
+from typing import List
 
 
 def _main() -> ExitStatus:
@@ -37,6 +40,12 @@ def _main() -> ExitStatus:
         type=str,
         default="info",
         help="Logging level. One of: debug, info, warning, error (case-insensitive)",
+    )
+    parser.add_argument(
+        "--post-comments", "-p",
+        action="store_true",
+        default=False,
+        help="Post plugin results as inline comments to GitLab merge request",
     )
 
     args = parser.parse_args()
@@ -73,10 +82,26 @@ def _main() -> ExitStatus:
                      ref=os.getenv("CI_COMMIT_REF_NAME"))
         log_info(f"Using refs from CI env: {str(ref)}")
         context = PluginContext(ref, git_repo, log)
+
+        plugin_failed_results: List[PluginResult] = []
+
         for plugin in plugins:
             with execute_plugin(plugin, context) as result:
                 if result.status == PluginResultStatus.Failed:
+                    plugin_failed_results.append(result)
+
+        if args.post_comments and plugin_failed_results:
+            log_info("Posting plugin failed results to GitLab")
+            plugin_failed_results_filtered = [result for result in plugin_failed_results if result.payloads]
+            if plugin_failed_results_filtered:
+                reporter = GitLabReporter(ref, log)
+                post_result = reporter.process_and_post(plugin_failed_results_filtered)
+                if not post_result:
+                    log_error("Failed to post results to GitLab")
                     return ExitStatus.Error
+
+        if plugin_failed_results:
+            return ExitStatus.Error
 
     return ExitStatus.Success
 
