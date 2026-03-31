@@ -28,6 +28,7 @@ dependencies = [
 [project.scripts]
 dgis-pre-receive = "dgis.hooks.pre_receive:entry_point"
 dgis-clang-format-diff = "dgis.hooks.scripts:entry_point"
+dgis-gitlab-ci-run = "dgis.hooks.scripts_gitlab_ci:entry_point"
 
 # Packaged plugins.
 [project.entry-points."dgis.hooks.plugins"]
