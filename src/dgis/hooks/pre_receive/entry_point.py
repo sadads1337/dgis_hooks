@@ -11,7 +11,7 @@ from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute
 from dgis.hooks.plugins.discover import discover_and_load_plugins
 from dgis.hooks.utility.common import ExitStatus, get_version
 from dgis.hooks.utility.git import parse_ref
-from dgis.hooks.utility.log import init_log, log_error, log_info, log_warning
+from dgis.hooks.utility.log import init_log, log_error, log_info, log_warning, LogLevel, log_level_from_string
 from dgis.hooks.utility.common import timed_block
 
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
@@ -28,15 +28,24 @@ def _main() -> ExitStatus:
         "dgis.hooks.plugins and dgis.hooks.plugins.packaged.",
     )
     parser.add_argument(
-        "--ignore-plugins",
+        "--ignore-plugins", "-i",
         nargs="*",
         default=["BlackFormatCheckPlugin"],
         help="Optional list of plugin names to ignore (by plugin class/entry-point name). "
         "Temporary defaults to ['BlackFormatCheckPlugin'] since its experimental.",
     )
+    parser.add_argument(
+        "--log-level", "-l",
+        type=str,
+        default="info",
+        help="Logging level. One of: debug, info, warning, error (case-insensitive)",
+    )
     args = parser.parse_args()
 
-    log = init_log(__package__)
+    if args.log_level:
+        log = init_log(__package__, log_level_from_string(args.log_level))
+    else:
+        log = init_log(__package__)
 
     log_info(f"Running pre-recieve hook version: {get_version()}")
 

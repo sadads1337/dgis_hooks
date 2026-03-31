@@ -13,7 +13,7 @@ from dgis.hooks.plugins.discover import discover_and_load_plugins
 from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute_plugin
 from dgis.hooks.utility.common import ExitStatus, get_version, timed_block
 from dgis.hooks.utility.git import GitRef
-from dgis.hooks.utility.log import init_log, log_info, log_warning, log_error
+from dgis.hooks.utility.log import init_log, log_info, log_warning, log_error, LogLevel, log_level_from_string
 
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
@@ -27,14 +27,25 @@ def _main() -> ExitStatus:
         help="Optional list of enabled plugins. If empty then enables all packaged plugins.",
     )
     parser.add_argument(
-        "--ignore-plugins",
+        "--ignore-plugins", "-i",
         nargs="*",
         default=["BlackFormatCheckPlugin"],
         help="Optional list of plugin names to ignore.",
     )
+    parser.add_argument(
+        "--log-level", "-l",
+        type=str,
+        default="info",
+        help="Logging level. One of: debug, info, warning, error (case-insensitive)",
+    )
+
     args = parser.parse_args()
 
-    log = init_log(__package__)
+    if args.log_level:
+        log = init_log(__package__, log_level_from_string(args.log_level))
+    else:
+        log = init_log(__package__)
+
     log_info(f"Running CI checks version: {get_version()}")
 
     enabled_plugins = args.plugins if args.plugins else []
