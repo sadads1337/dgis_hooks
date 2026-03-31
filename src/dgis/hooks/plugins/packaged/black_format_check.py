@@ -87,7 +87,7 @@ class BlackFormatCheckPlugin(Plugin):
                     except Exception:  # pylint: disable=broad-except
                         err_dec = None
 
-                    file_path = file_path.relative_to(context.repo_path)
+                    file_path = file_path.relative_to(Path(tmp_dir))
                     if not payloads:
                         payloads = [PluginResultPayload(stdout=out_dec, stderr=err_dec, diff=out_dec, file=file_path)]
                     else:
