@@ -232,9 +232,8 @@ class GitLabReporter:
             positional = not old_line and not new_line
 
             # Skip posting if identical comment body already exists for the same file.
-            if positional and comment.content.strip() in existing:
-                self._log_func(f"Skipping duplicate comment for {comment.file_path}", "debug")
-            if comment.content.strip() in existing_by_file.get(comment.file_path, set()):
+            content = comment.content.strip()
+            if positional and content in existing or content in existing_by_file.get(comment.file_path, set()):
                 self._log_func(f"Skipping duplicate comment for {comment.file_path}", "debug")
                 continue
 
