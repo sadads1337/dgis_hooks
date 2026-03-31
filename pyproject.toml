@@ -22,7 +22,11 @@ dependencies = [
     "simplejson",
     "importlib-metadata",
     "dataclasses",
-    "colorama"
+    "colorama",
+    "black",
+    "types-simplejson",
+    "requests",
+    "types-requests",
 ]
 
 [project.scripts]
