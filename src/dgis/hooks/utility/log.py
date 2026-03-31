@@ -11,6 +11,7 @@ class LogLevel(enum.Enum):
     Warning = logging.WARNING
     Error = logging.ERROR
 
+
 def log_level_from_string(level_str: str) -> LogLevel:
     level_str = level_str.lower()
     if level_str == "debug":

@@ -14,7 +14,7 @@ from dgis.hooks.plugins.plugin import PluginContext, PluginResultStatus, execute
 from dgis.hooks.scripts_gitlab_ci.gitlab_reporter import GitLabReporter
 from dgis.hooks.utility.common import ExitStatus, get_version, timed_block
 from dgis.hooks.utility.git import GitRef
-from dgis.hooks.utility.log import init_log, log_info, log_warning, log_error, LogLevel, log_level_from_string
+from dgis.hooks.utility.log import init_log, log_info, log_warning, log_error, log_level_from_string
 
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
@@ -30,19 +30,22 @@ def _main() -> ExitStatus:
         help="Optional list of enabled plugins. If empty then enables all packaged plugins.",
     )
     parser.add_argument(
-        "--ignore-plugins", "-i",
+        "--ignore-plugins",
+        "-i",
         nargs="*",
         default=["BlackFormatCheckPlugin"],
         help="Optional list of plugin names to ignore.",
     )
     parser.add_argument(
-        "--log-level", "-l",
+        "--log-level",
+        "-l",
         type=str,
         default="info",
         help="Logging level. One of: debug, info, warning, error (case-insensitive)",
     )
     parser.add_argument(
-        "--post-comments", "-p",
+        "--post-comments",
+        "-p",
         action="store_true",
         default=False,
         help="Post plugin results as inline comments to GitLab merge request",
@@ -78,8 +81,11 @@ def _main() -> ExitStatus:
             return ExitStatus.Error
 
     with timed_block("Processing checks"):
-        ref = GitRef(old_rev=os.getenv("CI_COMMIT_BEFORE_SHA"), new_rev=os.getenv("CI_COMMIT_SHA"),
-                     ref=os.getenv("CI_COMMIT_REF_NAME"))
+        ref = GitRef(
+            old_rev=os.getenv("CI_COMMIT_BEFORE_SHA"),
+            new_rev=os.getenv("CI_COMMIT_SHA"),
+            ref=os.getenv("CI_COMMIT_REF_NAME"),
+        )
         log_info(f"Using refs from CI env: {str(ref)}")
         context = PluginContext(ref, git_repo, log)
 

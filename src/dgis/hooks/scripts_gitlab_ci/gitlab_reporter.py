@@ -147,7 +147,7 @@ class GitLabReporter:
             self._log_func(
                 "GitLab API credentials not available. Skipping comment posting. "
                 "Make sure CI_API_V4_URL, CI_PROJECT_ID, and CI_MERGE_REQUEST_IID are set.",
-                "warning"
+                "warning",
             )
             return True
         if not comments:
@@ -185,7 +185,7 @@ class GitLabReporter:
                         "old_path": comment.file_path,
                         "new_path": comment.file_path,
                         "position_type": "text",
-                    }
+                    },
                 }
 
                 response = requests.post(url, json=body, headers=headers, timeout=10)
@@ -198,7 +198,7 @@ class GitLabReporter:
                     self._log_func(
                         f"Failed to post comment for {comment.file_path}. "
                         f"Status: {response.status_code}, Response: {response.text}",
-                        "error"
+                        "error",
                     )
                     all_posted = False
 

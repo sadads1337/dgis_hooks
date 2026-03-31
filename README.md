@@ -25,6 +25,10 @@ All deps listed in `requirements.txt` and `pyproject.toml`.
 | simplejson         | >=3.19  |
 | importlib-metadata | >=7.0   |
 | dataclasses        | >=0.6   |
+| colorama           | >=0.4   |
+| black              | >=24.3  |
+| types-simplejson   | >=3.19  |
+| requests           | >=2.28  |
 
 
 ## Build
@@ -81,3 +85,29 @@ By default, all checks with module placed in namespace `dgis.hooks.plugins` exec
 **But it's possible to**
 1. Select only necessary by passing positional argument with **plugin class name** to `dgis-pre-receive`.
 2. Add user-side checks by implementing class in a module placed in namespace `dgis.hooks.plugins`.
+
+## GitLab reporter (CI integration)
+
+The project includes a GitLab reporter used in `dgis-gitlab-ci-run` to post inline comments (discussions) to Merge Requests.
+
+Key behavior and environment variables:
+
+- Required CI environment variables (set by GitLab CI or override locally when testing):
+  - `CI_API_V4_URL` — base API URL, e.g. `https://gitlab.example/api/v4`
+  - `CI_PROJECT_ID` — numeric project id
+  - `CI_MERGE_REQUEST_IID` — MR internal id (IID)
+  - `LINT_REVIEW_PERSONAL_ACCESS_TOKEN` — personal token or private token used to post comments (if not set, posting is skipped)
+
+- Dedupe strategy implemented (default):
+  1. Reporter fetches existing discussions for the target MR (handles pagination).
+  2. Each published comment includes an invisible HTML marker `<!-- lint-review -->` to identify comments created by this tool.
+  3. Before posting, reporter compares the exact comment body (after strip) with existing bodies for the same file path. If an identical body exists, posting for that file is skipped (to avoid duplicates on repeated CI runs).
+  4. Local cache is updated after a successful post within the same run to prevent duplicate posts during one execution.
+
+- Notes / limitations:
+  - Deduplication is based on exact body equality (after trimming). If the formatted content changes (even slightly), it will be considered a different comment and posted again.
+  - If you prefer an "update in-place" behaviour (single comment is updated rather than skipped or duplicated), that can be implemented: reporter should store/obtain `discussion_id`/`note_id` for the bot's comments (by marker) and perform an update request instead of POST. This requires additional API calls and tests; ask if you want this behaviour.
+
+## Contributing
+
+PRs, issues and suggestions welcome. Please follow the existing style and run tests (`pytest`) before pushing changes.

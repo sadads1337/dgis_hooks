@@ -139,11 +139,7 @@ def test_post_comments_skips_existing(monkeypatch):
 
             def json(self):
                 return [
-                    {
-                        "notes": [
-                            {"body": existing_body, "position": {"old_path": "src/a.py", "new_path": "src/a.py"}}
-                        ]
-                    }
+                    {"notes": [{"body": existing_body, "position": {"old_path": "src/a.py", "new_path": "src/a.py"}}]}
                 ]
 
             headers = {}
@@ -160,4 +156,3 @@ def test_post_comments_skips_existing(monkeypatch):
     comment = FileComment(file_path="src/a.py", content=existing_body)
     ok = reporter._post_comments([comment])
     assert ok is True
-
