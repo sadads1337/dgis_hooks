@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import os
+import re
 import requests
 
 from collections import defaultdict
 from dataclasses import dataclass
 from logging import Logger
-from typing import Dict, List, Optional
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 from dgis.hooks.plugins.plugin import PluginResult, PluginResultPayload
 from dgis.hooks.utility.git import GitRef
@@ -16,6 +18,7 @@ from dgis.hooks.utility.git import GitRef
 class FileComment:
     file_path: str
     content: str
+    position: Tuple[Optional[int], Optional[int]]
 
 
 # Special key for results without file (like branch checks)
@@ -24,6 +27,23 @@ _g_dummy_file = "__general__"
 # Invisible marker added to all comments posted by this tool. Useful to identify
 # bot's comments among other discussions and avoid duplicates.
 _g_comment_marker = "<!-- lint-review -->"
+
+def pick_anchor_line(unified_diff: str) -> Tuple[Optional[int], Optional[int]]:
+    hunk_re = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+    for line in unified_diff.splitlines():
+        m = hunk_re.match(line)
+        if not m:
+            continue
+        old_start = int(m.group(1))
+        old_count = int(m.group(2) or "1")
+        new_start = int(m.group(3))
+        new_count = int(m.group(4) or "1")
+
+        if new_count > 0:
+            return new_start, None
+        if old_count > 0:
+            return None, old_start
+    return None, None
 
 
 def _group_results_by_file(results: List[PluginResult]) -> Dict[str, List[PluginResultPayload]]:
@@ -39,7 +59,7 @@ def _group_results_by_file(results: List[PluginResult]) -> Dict[str, List[Plugin
 
 
 def _format_payload_content(payload: PluginResultPayload) -> str:
-    content_parts = []
+    content_parts = [f"**Found problems in {payload.file}**\n---\n"] if payload.file else []
     if payload.stdout:
         content_parts.append(f"**stdout:**\n```\n{payload.stdout}\n```")
     if payload.stderr:
@@ -51,7 +71,7 @@ def _format_payload_content(payload: PluginResultPayload) -> str:
     return "\n\n".join(content_parts) if content_parts else "No details available"
 
 
-def _create_file_comment(file_path: str, payloads: List[PluginResultPayload]) -> FileComment:
+def _create_file_comment(file_path: Path, payloads: List[PluginResultPayload]) -> FileComment:
     comment_lines = []
     for i, payload in enumerate(payloads, 1):
         if len(payloads) > 1:
@@ -59,11 +79,19 @@ def _create_file_comment(file_path: str, payloads: List[PluginResultPayload]) ->
         content = _format_payload_content(payload)
         comment_lines.append(content)
     comment_content = "\n\n".join(comment_lines)
-    return FileComment(file_path=file_path, content=comment_content)
+
+    position = (None, None)
+    for payload in payloads:
+        if payload.diff:
+            position = pick_anchor_line(payload.diff)
+            break
+
+    return FileComment(file_path=str(file_path), content=comment_content, position=position)
 
 
 class GitLabReporter:
-    def __init__(self, git_ref: GitRef, log: Optional[Logger] = None):
+    def __init__(self, git_repo_path: Path, git_ref: GitRef, log: Optional[Logger] = None):
+        self._repo_path = git_repo_path
         self._ref = git_ref
         self._log = log
 
@@ -85,7 +113,7 @@ class GitLabReporter:
                 # For general comments (without file association), skip file-specific posting
                 self._log_func(f"General comment found (no file association) with {len(payloads)} payload(s)")
                 continue
-            comment = _create_file_comment(file_path, payloads)
+            comment = _create_file_comment(Path(file_path).relative_to(self._repo_path), payloads)
             comments.append(comment)
         return comments
 
@@ -142,6 +170,29 @@ class GitLabReporter:
 
         return existing
 
+    def _get_versions(self) -> Optional[List[Dict]]:
+        if not self._gitlab_api_url or not self._project_id or not self._merge_request_iid:
+            return None
+
+        headers = {
+            "PRIVATE-TOKEN": self._gitlab_token,
+        }
+
+        try:
+            url = (
+                f"{self._gitlab_api_url}/projects/{self._project_id}/merge_requests/"
+                f"{self._merge_request_iid}/versions"
+            )
+            resp = requests.get(url=url, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                return resp.json()
+            else:
+                self._log_func(f"Failed to fetch merge request versions: {resp.status_code}", "error")
+                return None
+        except requests.exceptions.RequestException as error:
+            self._log_func(f"Exception while fetching merge request versions: {error}", "error")
+            return None
+
     def _post_comments(self, comments: List[FileComment]) -> bool:
         if not self._gitlab_api_url or not self._project_id or not self._merge_request_iid:
             self._log_func(
@@ -153,6 +204,13 @@ class GitLabReporter:
         if not comments:
             self._log_func("No comments to post", "info")
             return True
+
+        versions = self._get_versions()
+        if not versions:
+            return True
+        # Take last revision to add comments to the latest version of the MR.
+        # This is important to avoid "position not found" errors.
+        version = versions[0]
 
         headers = {
             "PRIVATE-TOKEN": self._gitlab_token,
@@ -176,17 +234,31 @@ class GitLabReporter:
                     f"{self._merge_request_iid}/discussions"
                 )
 
-                body = {
-                    "body": comment.content,
-                    "position": {
-                        "base_sha": self._ref.old_rev,
-                        "start_sha": self._ref.old_rev,
-                        "head_sha": self._ref.new_rev,
-                        "old_path": comment.file_path,
-                        "new_path": comment.file_path,
+                old_line, new_line = comment.position
+                if not old_line and not new_line:
+                    # No positions find, so writing simple comment without position.
+                    # This can happen for example for comments generated by branch-level checks without file association.
+                    body = {
+                        "body": comment.content
+                    }
+                else:
+                    position = {
+                        "base_sha": version["base_commit_sha"],
+                        "start_sha": version["start_commit_sha"],
+                        "head_sha": version["head_commit_sha"],
+                        "old_path": str(comment.file_path),
+                        "new_path": str(comment.file_path),
                         "position_type": "text",
-                    },
-                }
+                    }
+                    if new_line:
+                        position["new_line"] = new_line
+                    else:
+                        position["old_line"] = old_line
+
+                    body = {
+                        "body": comment.content,
+                        "position": position,
+                    }
 
                 response = requests.post(url, json=body, headers=headers, timeout=10)
 

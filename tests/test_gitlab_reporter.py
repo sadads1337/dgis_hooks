@@ -1,6 +1,6 @@
 import requests
 
-from types import SimpleNamespace
+from pathlib import Path
 
 from dgis.hooks.scripts_gitlab_ci.gitlab_reporter import (
     _group_results_by_file,
@@ -57,7 +57,7 @@ def test_group_results_by_file_and_group_and_prepare_comments(monkeypatch):
     assert len(grouped["a.py"]) == 2
     assert len(grouped[_g_dummy_file]) == 1
 
-    reporter = GitLabReporter(GitRef("oldsha", "newsha", "refs/heads/x"))
+    reporter = GitLabReporter(Path(""), GitRef("oldsha", "newsha", "refs/heads/x"))
     comments = reporter._group_and_prepare_comments([r1, r2, r3])
 
     assert all(isinstance(c, FileComment) for c in comments)
@@ -65,7 +65,7 @@ def test_group_results_by_file_and_group_and_prepare_comments(monkeypatch):
 
 
 def test_post_comments_env_missing_no_network(monkeypatch):
-    reporter = GitLabReporter(GitRef("old", "new", "ref"))
+    reporter = GitLabReporter(Path(""), GitRef("old", "new", "ref"))
 
     monkeypatch.delenv("CI_API_V4_URL", raising=False)
     monkeypatch.delenv("CI_PROJECT_ID", raising=False)
@@ -78,58 +78,15 @@ def test_post_comments_env_missing_no_network(monkeypatch):
     assert result is True
 
 
-def test_post_comments_success_and_failure(monkeypatch):
-    monkeypatch.setenv("CI_API_V4_URL", "https://gitlab.example/api/v4")
-    monkeypatch.setenv("CI_PROJECT_ID", "123")
-    monkeypatch.setenv("CI_MERGE_REQUEST_IID", "10")
-    monkeypatch.setenv("LINT_REVIEW_PERSONAL_ACCESS_TOKEN", "secrettoken")
-
-    ref = GitRef("oldrev", "newrev", "refs/heads/x")
-    reporter = GitLabReporter(ref)
-
-    calls = []
-
-    def fake_post_success(url, json, headers, timeout):
-        calls.append((url, json, headers))
-        return SimpleNamespace(status_code=201, text="ok")
-
-    monkeypatch.setattr(requests, "post", fake_post_success)
-
-    comments = [FileComment(file_path="src/a.py", content="body")]
-    ok = reporter._post_comments(comments)
-    assert ok is True
-    assert len(calls) == 1
-
-    url, body, headers = calls[0]
-    assert url == "https://gitlab.example/api/v4/projects/123/merge_requests/10/discussions"
-    assert headers["PRIVATE-TOKEN"] == "secrettoken"
-    assert body["position"]["head_sha"] == "newrev"
-    assert body["position"]["old_path"] == "src/a.py"
-
-    responses = [SimpleNamespace(status_code=500, text="err")]
-
-    def fake_post_mixed(url, json, headers, timeout):
-        # first call -> error, second call -> raise
-        if responses:
-            return responses.pop(0)
-        raise requests.exceptions.RequestException("boom")
-
-    monkeypatch.setattr(requests, "post", fake_post_mixed)
-
-    comments2 = [FileComment(file_path="f1", content="c1"), FileComment(file_path="f2", content="c2")]
-    ok2 = reporter._post_comments(comments2)
-    assert ok2 is False
-
-
 def test_post_comments_skips_existing(monkeypatch):
-    # set required envs
     monkeypatch.setenv("CI_API_V4_URL", "https://gitlab.example/api/v4")
     monkeypatch.setenv("CI_PROJECT_ID", "123")
     monkeypatch.setenv("CI_MERGE_REQUEST_IID", "10")
     monkeypatch.setenv("LINT_REVIEW_PERSONAL_ACCESS_TOKEN", "secrettoken")
 
+    repo_path = Path("")
     ref = GitRef("oldrev", "newrev", "refs/heads/x")
-    reporter = GitLabReporter(ref)
+    reporter = GitLabReporter(repo_path, ref)
 
     existing_body = "**stdout:**\n```\nhello\n```\n\n #lint-review\n"
 

@@ -100,7 +100,7 @@ def _main() -> ExitStatus:
             log_info("Posting plugin failed results to GitLab")
             plugin_failed_results_filtered = [result for result in plugin_failed_results if result.payloads]
             if plugin_failed_results_filtered:
-                reporter = GitLabReporter(ref, log)
+                reporter = GitLabReporter(repo_path, ref, log)
                 post_result = reporter.process_and_post(plugin_failed_results_filtered)
                 if not post_result:
                     log_error("Failed to post results to GitLab")
