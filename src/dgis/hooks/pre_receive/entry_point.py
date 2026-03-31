@@ -87,7 +87,7 @@ def _main() -> ExitStatus:
             for line in file:
                 ref = parse_ref(line)
                 log_info(str(ref))
-                context = PluginContext(ref, git_repo, log)
+                context = PluginContext(ref, repo_path, git_repo, log)
                 for plugin in plugins:
                     with execute_plugin(plugin, context) as result:
                         if result.status == PluginResultStatus.Failed:

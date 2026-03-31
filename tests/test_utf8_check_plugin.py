@@ -31,7 +31,7 @@ def test_valid_file(tmp_path, file_content):
     git_repo.git.commit("-m", f"commit {str(tmp_file_path)}")
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(UTF8CheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok

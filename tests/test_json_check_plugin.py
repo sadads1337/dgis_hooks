@@ -43,7 +43,7 @@ def test_valid_json_created_file(tmp_path, json_content):
     make_and_commit_test_file(git_repo, Path("test.json"), json_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -58,7 +58,7 @@ def test_invalid_json_created_file(tmp_path, json_content):
     make_and_commit_test_file(git_repo, Path("test.json"), json_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed
@@ -73,7 +73,7 @@ def test_valid_json_modified_file(tmp_path, json_content):
     make_and_commit_test_file(git_repo, Path("test.json"), json_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -88,7 +88,7 @@ def test_invalid_json_modified_file(tmp_path, json_content):
     make_and_commit_test_file(git_repo, Path("test.json"), json_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed
@@ -107,7 +107,7 @@ def test_valid_invalid_json_deleted_file(tmp_path, json_content):
     git_repo.git.commit("-m", f"'commit {str(test_file_path)}'")
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -122,7 +122,7 @@ def test_ignore_created_non_json_files(tmp_path, json_content):
     make_and_commit_test_file(git_repo, Path("test2.txt"), json_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -137,7 +137,7 @@ def test_ignore_modified_non_json_files(tmp_path, json_content):
     make_and_commit_test_file(git_repo, Path("test2.txt"), json_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -156,7 +156,7 @@ def test_ignore_deleted_non_json_files(tmp_path, json_content):
     git_repo.git.commit("-m", f"'commit {str(test_file_path)}'")
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -179,7 +179,7 @@ def test_valid_json_force_updated_file(tmp_path, json_content):
     new_rev = commit.hexsha
 
     ref = GitRef(old_rev, new_rev, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -202,7 +202,7 @@ def test_invalid_json_force_updated_file(tmp_path, json_content):
     new_rev = commit.hexsha
 
     ref = GitRef(old_rev, new_rev, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(JsonCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed

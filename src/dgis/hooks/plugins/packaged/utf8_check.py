@@ -30,6 +30,7 @@ class UTF8CheckPlugin(Plugin):
             try:
                 context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode()
             except UnicodeDecodeError as error:
+                file_path = file_path.relative_to(context.repo_path)
                 payload = PluginResultPayload(stdout=error, stderr=None, diff=None, file=file_path)
                 if not payloads:
                     payloads = [payload]

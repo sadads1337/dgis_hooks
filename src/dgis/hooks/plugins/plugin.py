@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum
 from logging import Logger
+from pathlib import Path
 from typing import Optional, Any, Type, List
 
 from git import Repo
@@ -31,6 +32,7 @@ class PluginResult:
 @dataclass
 class PluginContext:
     ref: GitRef
+    repo_path: Path
     repo: Repo
     log: Optional[Logger] = None
 

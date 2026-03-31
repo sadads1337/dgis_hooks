@@ -50,7 +50,7 @@ def test_non_cpp_files(tmp_path):
     make_and_commit_test_file(git_repo, Path("test_2.txt"), "test2")
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(ClangFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -65,7 +65,7 @@ def test_non_cpp_empty_files(tmp_path):
     make_and_commit_test_file(git_repo, Path("test_2.txt"))
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(ClangFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -80,7 +80,7 @@ def test_cpp_empty_files(tmp_path):
     make_and_commit_test_file(git_repo, Path("test_2.cpp"))
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(ClangFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -96,7 +96,7 @@ def test_cpp_non_empty_files(tmp_path, cpp_content):
     make_and_commit_test_file(git_repo, Path("test.cpp"), cpp_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(ClangFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -115,7 +115,7 @@ def test_cpp_different_extensions_files(tmp_path, cpp_content):
         make_and_commit_test_file(git_repo, Path(test_filename), cpp_content)
 
         ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-        context = PluginContext(ref, git_repo, None)
+        context = PluginContext(ref, git_repo_path, git_repo, None)
 
         with execute_plugin(ClangFormatCheckPlugin, context) as result:
             assert result.status == PluginResultStatus.Ok
@@ -131,7 +131,7 @@ def test_cpp_non_empty_files_deep_files(tmp_path, cpp_content):
     make_and_commit_test_file(git_repo, Path("testdir/other/test.cpp"), cpp_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(ClangFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -146,7 +146,7 @@ def test_cpp_non_empty_files_no_format(tmp_path, cpp_content):
     make_and_commit_test_file(git_repo, Path("test.cpp"), cpp_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(ClangFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -162,7 +162,7 @@ def test_cpp_non_empty_files_invalid_format(tmp_path, cpp_content):
     make_and_commit_test_file(git_repo, Path("test.cpp"), cpp_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(ClangFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed
@@ -179,7 +179,7 @@ def test_cpp_non_empty_files_moved(tmp_path, cpp_content):
     move_and_commit_test_file(git_repo, Path("test.cpp"), Path("test_2.cpp"))
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(ClangFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok

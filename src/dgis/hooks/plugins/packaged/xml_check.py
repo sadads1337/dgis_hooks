@@ -31,6 +31,7 @@ class XmlCheckPlugin(Plugin):
             try:
                 ElementTree.parse(file).getroot()
             except ElementTree.ParseError as error:
+                file_path = file_path.relative_to(context.repo_path)
                 if not payloads:
                     payloads = [PluginResultPayload(stdout=error, stderr=None, diff=None, file=file_path)]
                 else:

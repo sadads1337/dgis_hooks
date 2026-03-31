@@ -54,7 +54,7 @@ def test_non_py_files(tmp_path):
     make_and_commit_test_file(git_repo, Path("test2.txt"), "test2")
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(BlackFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -69,7 +69,7 @@ def test_py_empty_files(tmp_path):
     make_and_commit_test_file(git_repo, Path("test_2.py"))
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(BlackFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -85,7 +85,7 @@ def test_py_non_empty_files(tmp_path, py_content):
     make_and_commit_test_file(git_repo, Path("test.py"), py_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(BlackFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -101,7 +101,7 @@ def test_py_non_empty_files_invalid_format(tmp_path, py_content):
     make_and_commit_test_file(git_repo, Path("test.py"), py_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(BlackFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed
@@ -117,7 +117,7 @@ def test_cpp_non_empty_files_deep_files(tmp_path, py_content):
     make_and_commit_test_file(git_repo, Path("testdir/other/test.py"), py_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(BlackFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -134,7 +134,7 @@ def test_py_non_empty_files_moved(tmp_path, py_content):
     move_and_commit_test_file(git_repo, Path("test.py"), Path("test_2.py"))
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(BlackFormatCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok

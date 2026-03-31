@@ -34,7 +34,7 @@ def test_valid_branch_names(tmp_path, branch_name):
     make_and_commit_test_file(git_repo, Path("test.txt"))
     make_and_commit_test_file(git_repo, Path("test2.txt"))
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(BranchCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -49,7 +49,7 @@ def test_invalid_branch_names(tmp_path, branch_name):
     make_and_commit_test_file(git_repo, Path("test.txt"))
     make_and_commit_test_file(git_repo, Path("test2.txt"))
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(BranchCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed

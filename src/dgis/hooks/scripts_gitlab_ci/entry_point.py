@@ -87,7 +87,7 @@ def _main() -> ExitStatus:
             ref=os.getenv("CI_COMMIT_REF_NAME"),
         )
         log_info(f"Using refs from CI env: {str(ref)}")
-        context = PluginContext(ref, git_repo, log)
+        context = PluginContext(ref, repo_path, git_repo, log)
 
         plugin_failed_results: List[PluginResult] = []
 

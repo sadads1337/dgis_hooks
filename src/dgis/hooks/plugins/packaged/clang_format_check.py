@@ -89,6 +89,7 @@ class ClangFormatCheckPlugin(Plugin):
                 p = Popen(clang_format_call, stdin=PIPE, stdout=PIPE, stderr=PIPE, env=env)
                 out, err = p.communicate()
                 if p.returncode != 0:
+                    file_path = file_path.relative_to(context.repo_path)
                     if not payloads:
                         payloads = [
                             PluginResultPayload(

@@ -8,7 +8,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from logging import Logger
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 
 from dgis.hooks.plugins.plugin import PluginResult, PluginResultPayload
 from dgis.hooks.utility.git import GitRef
@@ -18,7 +18,7 @@ from dgis.hooks.utility.git import GitRef
 class FileComment:
     file_path: str
     content: str
-    position: Tuple[Optional[int], Optional[int]]
+    position: Tuple[Optional[int], Optional[int]] = (None, None)
 
 
 # Special key for results without file (like branch checks)
@@ -27,6 +27,7 @@ _g_dummy_file = "__general__"
 # Invisible marker added to all comments posted by this tool. Useful to identify
 # bot's comments among other discussions and avoid duplicates.
 _g_comment_marker = "<!-- lint-review -->"
+
 
 def pick_anchor_line(unified_diff: str) -> Tuple[Optional[int], Optional[int]]:
     hunk_re = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
@@ -113,14 +114,15 @@ class GitLabReporter:
                 # For general comments (without file association), skip file-specific posting
                 self._log_func(f"General comment found (no file association) with {len(payloads)} payload(s)")
                 continue
-            comment = _create_file_comment(Path(file_path).relative_to(self._repo_path), payloads)
+            comment = _create_file_comment(file_path, payloads)
             comments.append(comment)
         return comments
 
-    def _fetch_existing_comments(self) -> Dict[str, set]:
-        existing: Dict[str, set] = {}
+    def _fetch_existing_comments(self) -> Tuple[Set[str], Dict[str, set]]:
+        existing: Set[str] = set()
+        existing_positional: Dict[str, set] = dict()
         if not self._gitlab_api_url or not self._project_id or not self._merge_request_iid:
-            return existing
+            return existing, existing_positional
 
         headers = {
             "PRIVATE-TOKEN": self._gitlab_token,
@@ -139,7 +141,7 @@ class GitLabReporter:
                 if resp.status_code != 200:
                     # unable to fetch discussions; bail out returning what we have
                     self._log_func(f"Failed to fetch existing discussions: {resp.status_code}", "warning")
-                    return existing
+                    return existing, existing_positional
 
                 discussions = resp.json()
                 if not discussions:
@@ -150,11 +152,14 @@ class GitLabReporter:
                     for note in notes:
                         body = note.get("body") or ""
                         pos = note.get("position") or {}
-                        old_path = pos.get("old_path")
-                        new_path = pos.get("new_path")
-                        file_path = old_path or new_path
-                        if file_path:
-                            existing.setdefault(file_path, set()).add(body.strip())
+                        if pos:
+                            old_path = pos.get("old_path")
+                            new_path = pos.get("new_path")
+                            file_path = old_path or new_path
+                            if file_path:
+                                existing_positional.setdefault(file_path, set()).add(body.strip())
+                        else:
+                            existing.add(body.strip())
 
                 # Pagination: GitLab may use X-Next-Page header
                 next_page = resp.headers.get("X-Next-Page")
@@ -166,9 +171,9 @@ class GitLabReporter:
                     break
         except requests.exceptions.RequestException as e:
             self._log_func(f"Exception while fetching discussions: {e}", "warning")
-            return existing
+            return existing, existing_positional
 
-        return existing
+        return existing, existing_positional
 
     def _get_versions(self) -> Optional[List[Dict]]:
         if not self._gitlab_api_url or not self._project_id or not self._merge_request_iid:
@@ -220,14 +225,19 @@ class GitLabReporter:
         all_posted = True
 
         # Fetch existing comments once and avoid duplicates.
-        existing_by_file = self._fetch_existing_comments()
+        existing, existing_by_file = self._fetch_existing_comments()
 
         for comment in comments:
+            old_line, new_line = comment.position
+            positional = not old_line and not new_line
+
             # Skip posting if identical comment body already exists for the same file.
-            bodies_for_file = existing_by_file.get(comment.file_path, set())
-            if comment.content.strip() in bodies_for_file:
+            if positional and comment.content.strip() in existing:
+                self._log_func(f"Skipping duplicate comment for {comment.file_path}", "debug")
+            if comment.content.strip() in existing_by_file.get(comment.file_path, set()):
                 self._log_func(f"Skipping duplicate comment for {comment.file_path}", "debug")
                 continue
+
             try:
                 url = (
                     f"{self._gitlab_api_url}/projects/{self._project_id}/merge_requests/"
@@ -235,12 +245,10 @@ class GitLabReporter:
                 )
 
                 old_line, new_line = comment.position
-                if not old_line and not new_line:
+                if positional:
                     # No positions find, so writing simple comment without position.
                     # This can happen for example for comments generated by branch-level checks without file association.
-                    body = {
-                        "body": comment.content
-                    }
+                    body = {"body": comment.content}
                 else:
                     position = {
                         "base_sha": version["base_commit_sha"],
@@ -265,7 +273,10 @@ class GitLabReporter:
                 if response.status_code in (201, 200):
                     self._log_func(f"Successfully posted comment for file: {comment.file_path}", "debug")
                     # Update local cache so subsequent comments in this run will be deduped too.
-                    existing_by_file.setdefault(comment.file_path, set()).add(comment.content.strip())
+                    if positional:
+                        existing.add(comment.content.strip())
+                    else:
+                        existing_by_file.setdefault(comment.file_path, set()).add(comment.content.strip())
                 else:
                     self._log_func(
                         f"Failed to post comment for {comment.file_path}. "

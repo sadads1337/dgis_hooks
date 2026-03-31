@@ -42,7 +42,7 @@ def test_valid_xml_created_file(tmp_path, xml_content):
     make_and_commit_test_file(git_repo, Path("test.xml"), xml_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -57,7 +57,7 @@ def test_invalid_xml_created_file(tmp_path, xml_content):
     make_and_commit_test_file(git_repo, Path("test.xml"), xml_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed
@@ -72,7 +72,7 @@ def test_valid_xml_modified_file(tmp_path, xml_content):
     make_and_commit_test_file(git_repo, Path("test.xml"), xml_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -87,7 +87,7 @@ def test_invalid_xml_modified_file(tmp_path, xml_content):
     make_and_commit_test_file(git_repo, Path("test.xml"), xml_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed
@@ -106,7 +106,7 @@ def test_valid_invalid_xml_deleted_file(tmp_path, xml_content):
     git_repo.git.commit("-m", f"'commit {str(test_file_path)}'")
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -121,7 +121,7 @@ def test_ignore_created_non_xml_files(tmp_path, xml_content):
     make_and_commit_test_file(git_repo, Path("test2.txt"), xml_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -136,7 +136,7 @@ def test_ignore_modified_non_xml_files(tmp_path, xml_content):
     make_and_commit_test_file(git_repo, Path("test2.txt"), xml_content)
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -155,7 +155,7 @@ def test_ignore_deleted_non_xml_files(tmp_path, xml_content):
     git_repo.git.commit("-m", f"'commit {str(test_file_path)}'")
 
     ref = GitRef(git_repo.commit("HEAD~1").hexsha, git_repo.commit("HEAD").hexsha, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -178,7 +178,7 @@ def test_valid_xml_force_updated_file(tmp_path, xml_content):
     new_rev = commit.hexsha
 
     ref = GitRef(old_rev, new_rev, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Ok
@@ -201,7 +201,7 @@ def test_invalid_xml_force_updated_file(tmp_path, xml_content):
     new_rev = commit.hexsha
 
     ref = GitRef(old_rev, new_rev, git_repo.head.ref.name)
-    context = PluginContext(ref, git_repo, None)
+    context = PluginContext(ref, git_repo_path, git_repo, None)
 
     with execute_plugin(XmlCheckPlugin, context) as result:
         assert result.status == PluginResultStatus.Failed
