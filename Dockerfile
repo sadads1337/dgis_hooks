@@ -11,8 +11,15 @@ RUN apt-get update \
        gcc \
        libffi-dev \
        git \
-       clang-format \
        binutils \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y wget gnupg lsb-release --no-install-recommends \
+    && wget https://apt.llvm.org/llvm.sh \
+    && chmod +x llvm.sh \
+    && ./llvm.sh 22 \
+    && apt-get install -y clang-format-22 \
+    && ln -s /usr/bin/clang-format-22 /usr/bin/clang-format \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml requirements.txt /app/
@@ -24,7 +31,7 @@ RUN if [ -f /app/requirements.txt ]; then pip install --no-cache-dir -r /app/req
 RUN python -m build -w -o /dist /app || python -m build -w -o /dist
 
 RUN mkdir -p /opt/clang-format/bin /opt/clang-format/lib \
-    && CLANG_BIN=$(command -v clang-format) \
+    && CLANG_BIN=$(command -v clang-format-22) \
     && cp "$CLANG_BIN" /opt/clang-format/bin/ \
     && for lib in $(ldd "$CLANG_BIN" | awk '/=>/ {print $(NF-1)}' | grep -v '^('); do \
          cp -u "$lib" /opt/clang-format/lib/ 2>/dev/null || true; \

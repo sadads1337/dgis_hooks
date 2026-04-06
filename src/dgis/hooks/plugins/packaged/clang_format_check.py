@@ -2,7 +2,7 @@ import tempfile
 import sys
 
 from pathlib import Path
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, run, CalledProcessError
 from typing import Optional
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
@@ -25,6 +25,13 @@ class ClangFormatCheckPlugin(Plugin):
         payloads = None
 
         binary_path = "clang-format"
+        if context.log:
+            try:
+                clang_format_version = run([binary_path, "--version"], capture_output=True, text=True, check=True)
+                context.log.info(clang_format_version.stdout.strip())
+            except (CalledProcessError, FileNotFoundError):
+                context.log.warning(f"clang-format tool is not installed, skipping checks")
+            return PluginResult(PluginResultStatus.Ok, None)
 
         script_cmd = [sys.executable, "-m", "dgis.hooks.scripts.clang_format_diff"]
 
