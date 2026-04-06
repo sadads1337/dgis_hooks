@@ -60,6 +60,8 @@ COPY --from=builder /opt/git /opt/git
 ENV PATH="/opt/clang-format/bin:/opt/git/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/clang-format/lib:/opt/git/lib:${LD_LIBRARY_PATH:-}"
 
+RUN ln -s /opt/clang-format/bin/clang-format-22 /opt/clang-format/bin/clang-format
+
 COPY --from=builder /dist /dist
 RUN pip install --no-cache-dir /dist/*.whl
 
