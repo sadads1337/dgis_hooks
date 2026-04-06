@@ -1,6 +1,7 @@
 import tempfile
 import sys
 
+from colorama import Fore, Style
 from pathlib import Path
 from subprocess import PIPE, Popen, run, CalledProcessError
 from typing import Optional
@@ -28,7 +29,8 @@ class ClangFormatCheckPlugin(Plugin):
         if context.log:
             try:
                 clang_format_version = run([binary_path, "--version"], capture_output=True, text=True, check=True)
-                context.log.info(clang_format_version.stdout.strip())
+                version = clang_format_version.stdout.strip()
+                context.log.info(f"{Fore.CYAN}{version}{Style.RESET_ALL}")
             except (CalledProcessError, FileNotFoundError):
                 context.log.warning(f"clang-format tool is not installed, skipping checks")
             return PluginResult(PluginResultStatus.Ok, None)
