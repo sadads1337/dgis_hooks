@@ -264,7 +264,7 @@ class GitLabReporter:
 
                     body = {
                         "body": comment.content,
-                        "position": position, # type: ignore[dict-item]
+                        "position": position,  # type: ignore[dict-item]
                     }
 
                 response = requests.post(url, json=body, headers=headers, timeout=10)
