@@ -72,7 +72,7 @@ def _format_payload_content(payload: PluginResultPayload) -> str:
     return "\n\n".join(content_parts) if content_parts else "No details available"
 
 
-def _create_file_comment(file_path: Path, payloads: List[PluginResultPayload]) -> FileComment:
+def _create_file_comment(file_path: str, payloads: List[PluginResultPayload]) -> FileComment:
     comment_lines = []
     for i, payload in enumerate(payloads, 1):
         if len(payloads) > 1:
@@ -87,7 +87,7 @@ def _create_file_comment(file_path: Path, payloads: List[PluginResultPayload]) -
             position = pick_anchor_line(payload.diff)
             break
 
-    return FileComment(file_path=str(file_path), content=comment_content, position=position)
+    return FileComment(file_path=file_path, content=comment_content, position=position)
 
 
 class GitLabReporter:
