@@ -5,6 +5,7 @@ from logging import Logger
 from pathlib import Path
 from typing import Optional, Any, Type, List
 
+from colorama import Fore, Style
 from git import Repo
 
 from dgis.hooks.utility.git import GitRef
@@ -13,6 +14,10 @@ from dgis.hooks.utility.git import GitRef
 class PluginResultStatus(Enum):
     Ok = 0
     Failed = 1
+
+    def colored(self):
+        color = Fore.GREEN if self is PluginResultStatus.Ok else Fore.RED
+        return f"{color}{self.name}{Style.RESET_ALL}"
 
 
 @dataclass

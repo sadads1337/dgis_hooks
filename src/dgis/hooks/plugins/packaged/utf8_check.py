@@ -48,7 +48,7 @@ class UTF8CheckPlugin(Plugin):
             return
 
         log_func = context.log.info if result.status == PluginResultStatus.Ok else context.log.error
-        log_func(f"Check '{cls.__name__}' finished with status: '{result.status}'")
+        log_func(f"Check '{cls.__name__}' finished with status: '{result.status.colored()}'")
 
         if result.status == PluginResultStatus.Ok:
             return
