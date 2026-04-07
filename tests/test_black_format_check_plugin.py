@@ -12,7 +12,7 @@ from tests.utility import make_and_commit_test_file, move_and_commit_test_file
 _g_pytoml_content = """
 [tool.black]
 line-length = 120
-target-version = ['py38']
+target-version = ['py312']
 exclude = '''
 /(
     \.eggs
