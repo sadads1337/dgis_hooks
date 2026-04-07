@@ -68,7 +68,7 @@ class BlackFormatCheckPlugin(Plugin):
                     context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
 
                 # Call black in --diff mode to detect formatting changes
-                black_call = script_cmd + ["--diff", str(file_path)]
+                black_call = script_cmd + ["--colored", "--diff", str(file_path)]
                 if context.log:
                     context.log.debug(f"Calling black tool: {' '.join(map(str, black_call))}")
 
