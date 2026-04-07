@@ -36,7 +36,7 @@ def _main() -> ExitStatus:
         "--ignore-plugins",
         "-i",
         nargs="*",
-        default=["BlackFormatCheckPlugin"],
+        default=[],
         help="Optional list of plugin names to ignore.",
     )
     parser.add_argument(

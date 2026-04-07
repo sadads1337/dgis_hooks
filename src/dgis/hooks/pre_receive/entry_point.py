@@ -34,9 +34,8 @@ def _main() -> ExitStatus:
         "--ignore-plugins",
         "-i",
         nargs="*",
-        default=["BlackFormatCheckPlugin"],
-        help="Optional list of plugin names to ignore (by plugin class/entry-point name). "
-        "Temporary defaults to ['BlackFormatCheckPlugin'] since its experimental.",
+        default=[],
+        help="Optional list of plugin names to ignore (by plugin class/entry-point name).",
     )
     parser.add_argument(
         "--log-level",
