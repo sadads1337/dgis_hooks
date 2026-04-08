@@ -37,10 +37,11 @@ class BlackFormatCheckPlugin(Plugin):
                 context.log.debug(f"Running in temp dir: '{tmp_dir}'")
 
             black_config = cls._find_black_confing(context)
+            black_config_tmp_path = Path(tmp_dir) / "pyproject.toml"
             if black_config:
                 if context.log:
                     context.log.debug(f"Found black config (pyproject.toml) HEXSHA: '{black_config}'")
-                with open(Path(tmp_dir) / "pyproject.toml", "wb") as file:
+                with open(black_config_tmp_path, "wb") as file:
                     file.write(context.repo.git.cat_file("blob", black_config).encode())
             else:
                 if context.log:
@@ -56,9 +57,13 @@ class BlackFormatCheckPlugin(Plugin):
                     continue
 
                 if not diff_content.b_path.endswith(cls._python_extension):
+                    if context.log:
+                        context.log.debug(f"Skipping non-py file: '{diff_content.b_path}'")
                     continue
 
                 if not diff_content.diff:
+                    if context.log:
+                        context.log.debug(f"Skipping no-diff file: '{diff_content.b_path}'")
                     continue
 
                 diff_str = diff_content.diff
@@ -66,6 +71,8 @@ class BlackFormatCheckPlugin(Plugin):
                     try:
                         diff_str = diff_content.diff.decode()
                     except Exception:  # pylint: disable=broad-except
+                        if context.log:
+                            context.log.debug(f"Failed to decode diff: '{diff_content.diff}'")
                         continue
 
                 diff_ranges = [f"--line-ranges={start}-{end}" for start, end in parse_diff_ranges(diff_str)]
@@ -81,7 +88,14 @@ class BlackFormatCheckPlugin(Plugin):
                     context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
 
                 # Call black in --diff mode to detect formatting changes
-                black_call = script_cmd + ["--color", "--diff", str(file_path), *diff_ranges]
+                black_call = script_cmd + [
+                    "--config",
+                    str(black_config_tmp_path),
+                    "--color",
+                    "--diff",
+                    str(file_path),
+                    *diff_ranges,
+                ]
                 if context.log:
                     context.log.debug(f"Calling black tool: {' '.join(map(str, black_call))}")
 
