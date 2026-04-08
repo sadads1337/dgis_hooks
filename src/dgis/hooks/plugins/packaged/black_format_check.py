@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import Optional
+from subprocess import CalledProcessError, run
+from colorama import Fore, Style
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 from dgis.hooks.utility.env import setup_env
@@ -28,6 +30,15 @@ class BlackFormatCheckPlugin(Plugin):
 
         # Always invoke black via the current Python interpreter to avoid PATH issues
         script_cmd = [sys.executable, "-m", "black"]
+
+        if context.log:
+            try:
+                black_version = run(script_cmd + ["--version"], capture_output=True, text=True, check=True)
+                version = black_version.stdout.strip()
+                context.log.info(f"{Fore.CYAN}{version}{Style.RESET_ALL}")
+            except (CalledProcessError, FileNotFoundError):
+                context.log.warning(f"black is not installed, skipping checks")
+            return PluginResult(PluginResultStatus.Ok, None)
 
         # Prepare environment for subprocess so the child process can import local packages if needed
         env = setup_env()
