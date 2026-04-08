@@ -69,9 +69,10 @@ def parse_ref(line: str) -> GitRef:
     old_rev, new_rev, ref = line.split()
     return GitRef(old_rev, new_rev, ref)
 
+
 def parse_diff_ranges(diff_text: str):
     ranges = []
-    pattern = re.compile(r'@@ -\d+,?\d* \+(\d+),?(\d*) @@')
+    pattern = re.compile(r"@@ -\d+,?\d* \+(\d+),?(\d*) @@")
 
     for line in diff_text.splitlines():
         match = pattern.match(line)
