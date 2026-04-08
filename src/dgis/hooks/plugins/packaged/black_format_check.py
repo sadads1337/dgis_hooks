@@ -94,6 +94,7 @@ class BlackFormatCheckPlugin(Plugin):
                     "--color",
                     "--diff",
                     "--check",
+                    "--quiet",
                     *diff_ranges,
                     str(file_path),
                 ]
@@ -102,25 +103,19 @@ class BlackFormatCheckPlugin(Plugin):
 
                 p = Popen(black_call, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=str(Path(tmp_dir)), env=env)
                 out, err = p.communicate()
-
-                # Black prints a diff to stdout when it would reformat a file.
-                # Treat presence of stdout (non-empty) as a formatting error.
-                if out and out.strip():
-                    try:
-                        out_dec = out.decode()
-                    except Exception:  # pylint: disable=broad-except
-                        out_dec = None
-                    try:
-                        err_dec = err.decode() if err else None
-                    except Exception:  # pylint: disable=broad-except
-                        err_dec = None
-
+                if p.returncode != 0:
                     file_path = file_path.relative_to(Path(tmp_dir))
                     if not payloads:
-                        payloads = [PluginResultPayload(stdout=out_dec, stderr=err_dec, diff=out_dec, file=file_path)]
+                        payloads = [
+                            PluginResultPayload(
+                                stdout=out.decode(), stderr=err.decode(), diff=out.decode(), file=file_path
+                            )
+                        ]
                     else:
                         payloads.append(
-                            PluginResultPayload(stdout=out_dec, stderr=err_dec, diff=out_dec, file=file_path)
+                            PluginResultPayload(
+                                stdout=out.decode(), stderr=err.decode(), diff=out.decode(), file=file_path
+                            )
                         )
 
         if not payloads:
