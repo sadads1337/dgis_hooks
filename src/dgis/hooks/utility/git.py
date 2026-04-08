@@ -1,3 +1,5 @@
+import re
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -66,3 +68,22 @@ class GitRef:
 def parse_ref(line: str) -> GitRef:
     old_rev, new_rev, ref = line.split()
     return GitRef(old_rev, new_rev, ref)
+
+def parse_diff_ranges(diff_text: str):
+    ranges = []
+    pattern = re.compile(r'@@ -\d+,?\d* \+(\d+),?(\d*) @@')
+
+    for line in diff_text.splitlines():
+        match = pattern.match(line)
+
+        if not match:
+            continue
+
+        start = int(match.group(1))
+        length = int(match.group(2)) if match.group(2) else 1
+
+        if length > 0:
+            end = start + length - 1
+            ranges.append((start, end))
+
+    return ranges

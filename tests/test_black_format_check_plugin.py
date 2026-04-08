@@ -108,7 +108,7 @@ def test_py_non_empty_files_invalid_format(tmp_path, py_content):
 
 
 @pytest.mark.parametrize("py_content", _g_good_py)
-def test_cpp_non_empty_files_deep_files(tmp_path, py_content):
+def test_py_non_empty_files_deep_files(tmp_path, py_content):
     git_repo_path = tmp_path / "tmp-rep"
     git_repo = Repo.init(git_repo_path)
 

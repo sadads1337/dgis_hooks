@@ -7,6 +7,7 @@ from typing import Optional
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 from dgis.hooks.utility.env import setup_env
+from dgis.hooks.utility.git import parse_diff_ranges
 
 
 class BlackFormatCheckPlugin(Plugin):
@@ -57,6 +58,18 @@ class BlackFormatCheckPlugin(Plugin):
                 if not diff_content.b_path.endswith(cls._python_extension):
                     continue
 
+                if not diff_content.diff:
+                    continue
+
+                diff_str = diff_content.diff
+                if isinstance(diff_str, (bytearray, bytes)):
+                    try:
+                        diff_str = diff_content.diff.decode()
+                    except Exception:  # pylint: disable=broad-except
+                        continue
+
+                diff_ranges = [f"--line-ranges={start}-{end}" for start, end in parse_diff_ranges(diff_str)]
+
                 file_path = Path(tmp_dir) / diff_content.b_path
                 if len(file_path.parents) > 0 and not file_path.parent.exists():
                     file_path.parent.mkdir(parents=True)
@@ -68,7 +81,7 @@ class BlackFormatCheckPlugin(Plugin):
                     context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")
 
                 # Call black in --diff mode to detect formatting changes
-                black_call = script_cmd + ["--colored", "--diff", str(file_path)]
+                black_call = script_cmd + ["--color", "--diff", str(file_path), *diff_ranges]
                 if context.log:
                     context.log.debug(f"Calling black tool: {' '.join(map(str, black_call))}")
 
