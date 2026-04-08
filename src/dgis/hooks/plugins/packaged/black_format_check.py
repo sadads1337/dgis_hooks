@@ -93,6 +93,7 @@ class BlackFormatCheckPlugin(Plugin):
                     str(black_config_tmp_path),
                     "--color",
                     "--diff",
+                    "--check",
                     *diff_ranges,
                     str(file_path),
                 ]
