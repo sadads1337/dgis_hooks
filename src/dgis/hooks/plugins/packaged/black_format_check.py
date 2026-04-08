@@ -93,8 +93,8 @@ class BlackFormatCheckPlugin(Plugin):
                     str(black_config_tmp_path),
                     "--color",
                     "--diff",
-                    str(file_path),
                     *diff_ranges,
+                    str(file_path),
                 ]
                 if context.log:
                     context.log.debug(f"Calling black tool: {' '.join(map(str, black_call))}")
