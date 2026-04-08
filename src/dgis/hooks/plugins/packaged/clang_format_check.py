@@ -33,7 +33,7 @@ class ClangFormatCheckPlugin(Plugin):
                 context.log.info(f"{Fore.CYAN}{version}{Style.RESET_ALL}")
             except (CalledProcessError, FileNotFoundError):
                 context.log.warning(f"clang-format tool is not installed, skipping checks")
-            return PluginResult(PluginResultStatus.Ok, None)
+                return PluginResult(PluginResultStatus.Ok, None)
 
         script_cmd = [sys.executable, "-m", "dgis.hooks.scripts.clang_format_diff"]
 

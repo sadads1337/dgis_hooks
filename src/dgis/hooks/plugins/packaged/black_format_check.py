@@ -38,7 +38,7 @@ class BlackFormatCheckPlugin(Plugin):
                 context.log.info(f"{Fore.CYAN}{version}{Style.RESET_ALL}")
             except (CalledProcessError, FileNotFoundError):
                 context.log.warning(f"black is not installed, skipping checks")
-            return PluginResult(PluginResultStatus.Ok, None)
+                return PluginResult(PluginResultStatus.Ok, None)
 
         # Prepare environment for subprocess so the child process can import local packages if needed
         env = setup_env()
