@@ -6,7 +6,6 @@ Run this script or `dgis-gitlab-ci-run --help` to get more info.
 from __future__ import annotations
 
 import argparse
-import colorama
 import os
 import sys
 
@@ -23,8 +22,6 @@ from typing import List
 
 
 def _main() -> ExitStatus:
-    colorama.init(autoreset=True)
-
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "plugins",

@@ -4,7 +4,6 @@ Run this script or `dgis-pre-receive --help` to get more info.
 """
 
 import argparse
-import colorama
 import fileinput
 import os
 
@@ -19,8 +18,6 @@ from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
 
 def _main() -> ExitStatus:
-    colorama.init(autoreset=True)
-
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "plugins",
