@@ -9,7 +9,7 @@ from colorama import Fore, Style
 
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 from dgis.hooks.utility.env import setup_env
-from dgis.hooks.utility.git import parse_diff_ranges
+from dgis.hooks.utility.git import parse_diff_ranges, blob_from_hexsha
 
 
 class BlackFormatCheckPlugin(Plugin):
@@ -93,7 +93,7 @@ class BlackFormatCheckPlugin(Plugin):
                     file_path.parent.mkdir(parents=True)
 
                 with open(file_path, "wb") as file:
-                    file.write(context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode())
+                    file.write(blob_from_hexsha(context.repo, diff_content.b_blob.hexsha))
 
                 if context.log:
                     context.log.debug(f"Executing '{cls.__name__}' for file: '{file_path}'")

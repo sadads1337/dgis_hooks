@@ -9,11 +9,12 @@ from typing import Optional
 from dgis.hooks.plugins.plugin import Plugin, PluginContext, PluginResult, PluginResultPayload, PluginResultStatus
 from dgis.hooks.utility.format import is_supported_cpp_file_extension
 from dgis.hooks.utility.env import setup_env
+from dgis.hooks.utility.git import blob_from_hexsha
 
 
 class ClangFormatCheckPlugin(Plugin):
     @classmethod
-    def _find_clang_format_style(cls, context: PluginContext) -> Optional[str]:
+    def _find_clang_format_style_sha(cls, context: PluginContext) -> Optional[str]:
         clang_format_style = None
         for obj in context.repo.tree("HEAD").traverse():
             if obj.type == "blob" and obj.name == ".clang-format":
@@ -45,12 +46,12 @@ class ClangFormatCheckPlugin(Plugin):
             if context.log:
                 context.log.debug(f"Running in temp dir: '{tmp_dir}'")
 
-            clang_format_style = cls._find_clang_format_style(context)
-            if clang_format_style:
+            clang_format_style_sha = cls._find_clang_format_style_sha(context)
+            if clang_format_style_sha:
                 if context.log:
-                    context.log.debug(f"Found .clang-format HEXSHA: '{clang_format_style}'")
+                    context.log.debug(f"Found .clang-format HEXSHA: '{clang_format_style_sha}'")
                 with open(Path(tmp_dir) / ".clang-format", "wb") as file:
-                    file.write(context.repo.git.cat_file("blob", clang_format_style).encode())
+                    file.write(blob_from_hexsha(context.repo, clang_format_style_sha))
             else:
                 if context.log:
                     context.log.warning(f"No clang-format style file found while executing '{cls.__name__}'")
@@ -69,7 +70,7 @@ class ClangFormatCheckPlugin(Plugin):
                     if len(file_path.parents) > 0 and not file_path.parent.exists():
                         file_path.parent.mkdir(parents=True)
                     with open(file_path, "wb") as file:
-                        file.write(context.repo.git.cat_file("blob", diff_content.b_blob.hexsha).encode())
+                        file.write(blob_from_hexsha(context.repo, diff_content.b_blob.hexsha))
                 else:
                     continue
 

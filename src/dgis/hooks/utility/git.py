@@ -88,3 +88,10 @@ def parse_diff_ranges(diff_text: str):
             ranges.append((start, end))
 
     return ranges
+
+
+def blob_from_hexsha(repo: Repo, hexsha: str) -> bytes:
+    data = repo.git.cat_file("blob", hexsha).encode()
+    if data and not data.endswith(b"\n"):
+        data += b"\n"
+    return data
